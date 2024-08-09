@@ -9,7 +9,7 @@ import {
 import { formatUnits } from 'viem'
 import { useAccount } from 'wagmi'
 
-import { BuyWithCreditCardButton } from './BuyWithCreditCardButton'
+import { BuyMainCurrencyButton } from './BuyMainCurrencyButton'
 import { CollectibleTileImage } from '../CollectibleTileImage'
 import {
   useTokenMetadata,
@@ -123,7 +123,7 @@ export const ItemsForSale = ({
                 </Text>
               </Box>
               <Box marginTop="1">
-                <BuyWithCreditCardButton
+                <BuyMainCurrencyButton
                   chainId={chainId}
                   collectionAddress={NFT_TOKEN_ADDRESS}
                   tokenId={tokenMetadata.tokenId}

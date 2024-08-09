@@ -1,5 +1,7 @@
 import { SequenceIndexer } from '@0xsequence/indexer'
 import { useQuery } from '@tanstack/react-query'
+import type { PublicClient } from 'viem'
+
 
 import { useMetadataClient } from '../hooks/useMetadataClient'
 import { useIndexerClient } from '../hooks/useIndexerClient'

@@ -3,6 +3,7 @@ import { useCheckoutModal, CheckoutSettings } from '@0xsequence/kit-checkout'
 import { encodeFunctionData, Hex, toHex } from 'viem'
 import { Button } from '@0xsequence/design-system'
 import { usePublicClient, useWalletClient, useAccount } from 'wagmi'
+import { useReadContract } from 'wagmi' 
 
 import { SALES_CONTRACT_ABI } from '../../constants/abi'
 import {
@@ -11,23 +12,40 @@ import {
   UNITARY_PRICE_RAW
 } from '../../constants'
 
-interface BuyWithCreditCardButtonProps {
+interface BuyMainCurrencyButtonProps {
   tokenId: string
   collectionAddress: string
   chainId: number
 }
 
-export const BuyWithCreditCardButton = ({
+export const BuyMainCurrencyButton = ({
   tokenId,
   collectionAddress,
   chainId,
-}: BuyWithCreditCardButtonProps) => {
+}: BuyMainCurrencyButtonProps) => {
   const queryClient = useQueryClient()
   const { triggerCheckout } = useCheckoutModal()
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const { address: userAddress } = useAccount()
+  const { data: paymentDetailsData, isLoading: paymentDetailsIsLoading } = useReadContract({
+    abi: SALES_CONTRACT_ABI,
+    functionName: 'tokenSaleDetails',
+    chainId,
+    address: SALES_CONTRACT_ADDRESS,
+    args: [BigInt(tokenId)]
+  })
   
+  const { data: paymentTokenData, isLoading: paymentTokenIsLoading } = useReadContract({
+    abi: SALES_CONTRACT_ABI,
+    functionName: 'paymentToken',
+    chainId,
+    address: SALES_CONTRACT_ADDRESS,
+  })
+  
+  console.log('paymentDetailsData', paymentDetailsData)
+  console.log('paymentTokenData..', paymentTokenData)
+
   const onClickBuy = () => {
     if (!publicClient || !walletClient || !userAddress) {
       return
