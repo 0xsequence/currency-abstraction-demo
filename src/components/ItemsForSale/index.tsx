@@ -7,20 +7,18 @@ import {
   useMediaQuery
 } from '@0xsequence/design-system'
 import { formatUnits } from 'viem'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 
 import { BuyMainCurrencyButton } from './BuyMainCurrencyButton'
 import { CollectibleTileImage } from '../CollectibleTileImage'
 import {
   useTokenMetadata,
   useCollectionBalance,
-  useContractInfo
 } from '../../hooks/data'
+import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import {  
-  CHAIN_ID,
   itemsForSales,
   NFT_TOKEN_ADDRESS,
-  salesCurrency,
 } from '../../constants'
 
 interface ItemsForSaleProps {
@@ -48,12 +46,9 @@ export const ItemsForSale = ({
     itemsForSales.map(item => item.tokenId)
   )
 
-  const { data: currencyContractInfoData, isLoading: currencyContractInfoIsLoading } = useContractInfo(
-    CHAIN_ID,
-    salesCurrency.currencyAddress
-  )
+  const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
 
-  const isLoading = tokenMetadatasLoading || collectionBalanceIsLoading || currencyContractInfoIsLoading
+  const isLoading = tokenMetadatasLoading || collectionBalanceIsLoading || currencyIsLoading
 
   if (isLoading) {
     return (
@@ -90,8 +85,8 @@ export const ItemsForSale = ({
         const price = itemsForSales.find(item => (
           item.tokenId === tokenMetadata.tokenId
         ))?.priceRaw || '100000'
-
-        const priceFormatted = formatUnits(BigInt(price), salesCurrency.decimals)
+        const currencyDecimals = currencyData?.decimals || 0
+        const priceFormatted = formatUnits(BigInt(price), currencyDecimals)
 
         return (
           <Box
@@ -116,7 +111,7 @@ export const ItemsForSale = ({
                   <Text variant="small" color="text100">
                     {`Price: ${priceFormatted}`}
                   </Text>
-                  <TokenImage size="xs" src={currencyContractInfoData?.logoURI} />
+                  <TokenImage size="xs" src={currencyData?.logoURI} />
                 </Box>
                 <Text color="text100">
                   {tokenMetadata.name}

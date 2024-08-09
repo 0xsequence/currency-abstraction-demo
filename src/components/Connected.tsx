@@ -7,14 +7,15 @@ import {
   NFT_TOKEN_ADDRESS,
   SALES_CONTRACT_ADDRESS,
   CHAIN_ID,
-  salesCurrency
 } from '../constants'
 import { useContractInfo } from '../hooks/data'
+import { useSalesCurrency } from '../hooks/useSalesCurrency'
 
 export const Connected = () => {
   const { address: userAddress } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: contractInfoData, isLoading: contractInfoIsLoading } = useContractInfo(CHAIN_ID, NFT_TOKEN_ADDRESS)
+  const { data: currencyData } = useSalesCurrency()
 
   const AddressDisplay = ({
     label,
@@ -96,7 +97,7 @@ export const Connected = () => {
           <AddressDisplay label="User Address" address={userAddress} />
           <AddressDisplay label="Sales Contract" address={SALES_CONTRACT_ADDRESS} />
           <AddressDisplay label="NFT token Contract" address={NFT_TOKEN_ADDRESS} />
-          <AddressDisplay label="Payment currency Address" address={salesCurrency.currencyAddress} />
+          <AddressDisplay label="Payment currency Address" address={currencyData?.address || ''} />
         </Box>
       </Collapsible>
       

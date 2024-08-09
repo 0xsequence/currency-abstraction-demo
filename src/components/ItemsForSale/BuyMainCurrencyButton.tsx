@@ -8,9 +8,9 @@ import { useReadContract } from 'wagmi'
 import { SALES_CONTRACT_ABI } from '../../constants/abi'
 import {
   SALES_CONTRACT_ADDRESS,
-  salesCurrency,
   UNITARY_PRICE_RAW
 } from '../../constants'
+import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 
 interface BuyMainCurrencyButtonProps {
   tokenId: string
@@ -28,6 +28,8 @@ export const BuyMainCurrencyButton = ({
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const { address: userAddress } = useAccount()
+  const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
+
   const { data: paymentDetailsData, isLoading: paymentDetailsIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
     functionName: 'tokenSaleDetails',
@@ -47,7 +49,7 @@ export const BuyMainCurrencyButton = ({
   console.log('paymentTokenData..', paymentTokenData)
 
   const onClickBuy = () => {
-    if (!publicClient || !walletClient || !userAddress) {
+    if (!publicClient || !walletClient || !userAddress || !currencyData) {
       return
     }
 
@@ -75,7 +77,7 @@ export const BuyMainCurrencyButton = ({
         [BigInt(tokenId)],
         [BigInt(1)],
         toHex(0),
-        salesCurrency.currencyAddress,
+        currencyData.address,
         BigInt(currencyPrice),
         [toHex(0, { size: 32 })],
       ]
@@ -88,9 +90,9 @@ export const BuyMainCurrencyButton = ({
         contractAddress: SALES_CONTRACT_ADDRESS,
         recipientAddress: userAddress || '',
         currencyQuantity: currencyPrice,
-        currencySymbol: salesCurrency.symbol,
-        currencyAddress: salesCurrency.currencyAddress,
-        currencyDecimals: String(salesCurrency.decimals),
+        currencySymbol: currencyData.symbol,
+        currencyAddress: currencyData.address,
+        currencyDecimals: String(currencyData.decimals),
         nftId: String(tokenId),
         nftAddress: collectionAddress,
         nftQuantity: '1',
@@ -119,6 +121,7 @@ export const BuyMainCurrencyButton = ({
 
   return (
     <Button
+      loading={currencyIsLoading}
       size="sm"
       variant="primary"
       label="Purchase"
