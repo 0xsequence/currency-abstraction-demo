@@ -2,13 +2,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCheckoutModal, CheckoutSettings } from '@0xsequence/kit-checkout'
 import { encodeFunctionData, Hex, toHex } from 'viem'
 import { Button } from '@0xsequence/design-system'
-import { usePublicClient, useWalletClient, useAccount } from 'wagmi'
-import { useReadContract } from 'wagmi' 
+import { usePublicClient, useWalletClient, useAccount, useReadContract } from 'wagmi'
 
 import { SALES_CONTRACT_ABI } from '../../constants/abi'
 import {
   SALES_CONTRACT_ADDRESS,
-  UNITARY_PRICE_RAW
+  CHAIN_ID
 } from '../../constants'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 
@@ -30,30 +29,24 @@ export const BuyMainCurrencyButton = ({
   const { address: userAddress } = useAccount()
   const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
 
-  const { data: paymentDetailsData, isLoading: paymentDetailsIsLoading } = useReadContract({
+  interface TokenSaleDetailData {
+    cost: bigint
+  }
+
+  const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
     functionName: 'tokenSaleDetails',
-    chainId,
+    chainId: CHAIN_ID,
     address: SALES_CONTRACT_ADDRESS,
     args: [BigInt(tokenId)]
   })
-  
-  const { data: paymentTokenData, isLoading: paymentTokenIsLoading } = useReadContract({
-    abi: SALES_CONTRACT_ABI,
-    functionName: 'paymentToken',
-    chainId,
-    address: SALES_CONTRACT_ADDRESS,
-  })
-  
-  console.log('paymentDetailsData', paymentDetailsData)
-  console.log('paymentTokenData..', paymentTokenData)
+
+  const currencyPrice = ((tokenSaleDetailsData as TokenSaleDetailData)?.cost || 0n).toString()
 
   const onClickBuy = () => {
     if (!publicClient || !walletClient || !userAddress || !currencyData) {
       return
     }
-
-    const currencyPrice = UNITARY_PRICE_RAW
 
     /**
      * Mint tokens.
@@ -121,7 +114,7 @@ export const BuyMainCurrencyButton = ({
 
   return (
     <Button
-      loading={currencyIsLoading}
+      loading={currencyIsLoading || tokenSaleDetailsDataIsLoading}
       size="sm"
       variant="primary"
       label="Purchase"
