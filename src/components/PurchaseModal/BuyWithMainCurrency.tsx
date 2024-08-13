@@ -211,7 +211,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       return (
         <LoadingIcon />
       )
-    } else if (isApproved) {
+    } else if (isApproved || purchaseInProgress) {
       return (
         <SuccessIcon />
       )
