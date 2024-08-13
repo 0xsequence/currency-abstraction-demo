@@ -6,11 +6,11 @@ import { useProjectAccessKey } from './useProjectAccessKey'
 export const useAPIClient = () => {
   const projectAccessKey = useProjectAccessKey()
 
-  const clientUrl = 'https://api.sequence.app'
+  const clientUrl = import.meta.env.VITE_SEQUENCE_API_URL || 'https://api.sequence.app'
 
   const apiClient = useMemo(() => {
     return new SequenceAPIClient(clientUrl, projectAccessKey)
-  }, [projectAccessKey])
+  }, [clientUrl, projectAccessKey])
 
   return apiClient
 }
