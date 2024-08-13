@@ -7,6 +7,7 @@ import {
   NFT_TOKEN_ADDRESS,
   SALES_CONTRACT_ADDRESS,
   CHAIN_ID,
+  ETHERSCAN_URL,
 } from '../constants'
 import { useContractInfo } from '../hooks/data'
 import { useSalesCurrency } from '../hooks/useSalesCurrency'
@@ -35,7 +36,7 @@ export const Connected = () => {
           variant="normal"
           as="a"
           color="text100"
-          href={`https://polygonscan.com/address/${address}`}
+          href={`${ETHERSCAN_URL}/address/${address}`}
           target="_blank"
           rel="noreferrer"
           ellipsis
