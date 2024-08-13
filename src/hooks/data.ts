@@ -58,6 +58,10 @@ interface UseBalanceArgs {
 }
 
 export const getBalance = async (indexerClient: SequenceIndexer, args: UseBalanceArgs) => {
+  if (!args.chainId || !args.accountAddress || !args.contractAddress) {
+    return []
+  }
+
   const res = await indexerClient.getTokenBalances({
     accountAddress: args.accountAddress,
     contractAddress: args.contractAddress,
