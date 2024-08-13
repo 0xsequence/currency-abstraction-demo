@@ -1,7 +1,5 @@
 import { SequenceIndexer } from '@0xsequence/indexer'
 import { useQuery } from '@tanstack/react-query'
-import type { PublicClient } from 'viem'
-
 
 import { useMetadataClient } from '../hooks/useMetadataClient'
 import { useIndexerClient } from '../hooks/useIndexerClient'
@@ -51,7 +49,7 @@ export const useContractInfo = (chainId: number, contractAddress: string | undef
   })
 }
 
-interface UseCollectionBalanceArgs {
+interface UseBalanceArgs {
   chainId: number
   accountAddress: string
   contractAddress: string
@@ -59,7 +57,7 @@ interface UseCollectionBalanceArgs {
   verifiedOnly?: boolean
 }
 
-export const getCollectionBalance = async (indexerClient: SequenceIndexer, args: UseCollectionBalanceArgs) => {
+export const getBalance = async (indexerClient: SequenceIndexer, args: UseBalanceArgs) => {
   const res = await indexerClient.getTokenBalances({
     accountAddress: args.accountAddress,
     contractAddress: args.contractAddress,
@@ -72,12 +70,12 @@ export const getCollectionBalance = async (indexerClient: SequenceIndexer, args:
   return res?.balances || []
 }
 
-export const useCollectionBalance = (args: UseCollectionBalanceArgs) => {
+export const useBalance = (args: UseBalanceArgs) => {
   const indexerClient = useIndexerClient(args.chainId)
 
   return useQuery({
     queryKey: ['balances', args],
-    queryFn: () => getCollectionBalance(indexerClient, args),
+    queryFn: () => getBalance(indexerClient, args),
     retry: true,
     staleTime: time.oneSecond * 30,
     enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress

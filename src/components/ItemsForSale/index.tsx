@@ -12,7 +12,7 @@ import { CollectibleTileImage } from '../CollectibleTileImage'
 import { CollectibleCardContent } from './CollectibleCardContent'
 import {
   useTokenMetadata,
-  useCollectionBalance,
+  useBalance,
 } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import {  
@@ -31,7 +31,7 @@ export const ItemsForSale = ({
 }: ItemsForSaleProps) => {
   const isMobile = useMediaQuery('isMobile')
   const { address: userAddress } = useAccount()
-  const { data: collectionBalanceData, isLoading: collectionBalanceIsLoading } = useCollectionBalance({
+  const { data: collectionBalanceData, isLoading: collectionBalanceIsLoading } = useBalance({
     accountAddress: userAddress || '',
     contractAddress: collectionAddress,
     chainId,

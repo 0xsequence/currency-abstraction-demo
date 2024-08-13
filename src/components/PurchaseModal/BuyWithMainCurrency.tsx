@@ -9,9 +9,10 @@ import {
   CheckmarkIcon,
   CloseIcon
 } from '@0xsequence/design-system'
-import { formatUnits, zeroAddress, Hex } from 'viem'
+import { formatUnits, zeroAddress, Hex, toHex } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
+import { useBalance } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
@@ -65,12 +66,25 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     }
   })
 
+  const { data: currencyBalanceData, isLoading: currencyBalanceIsLoading } = useBalance({
+    chainId: args.chainId,
+    contractAddress: currencyData?.address || '',
+    accountAddress: userAddress || '',
+  })
+
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
   const priceFormatted = formatUnits(BigInt(price), currencyData?.decimals || 0)
 
+  const balance = BigInt(currencyBalanceData?.[0]?.balance || '0')
+  const balanceFormatted = formatUnits(balance, currencyData?.decimals || 0)
+
+  const isNotEnoughFunds: boolean = price > balance
+
+  console.log('currency balance..', currencyBalanceData)
+
   const isApproved: boolean = (allowanceData as bigint) >= BigInt(price) 
 
-  const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading
+  const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading
 
   const onClickApprove = async () => {
     if (!walletClient || !userAddress || !publicClient) {
@@ -111,11 +125,53 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
     setPurchaseInProgress(true)
 
-    //.... call mint function
+    try {
+      const walletClientChainId = await walletClient.getChainId()
+      if (walletClientChainId !== args.chainId) {
+        await walletClient.switchChain({ id: args.chainId })
+      }
+  
+      /*   **
+      * Mint tokens.
+      * @param to Address to mint tokens to.
+      * @param tokenIds Token IDs to mint.
+      * @param amounts Amounts of tokens to mint.
+      * @param data Data to pass if receiver is contract.
+      * @param expectedPaymentToken ERC20 token address to accept payment in. address(0) indicates ETH.
+      * @param maxTotal Maximum amount of payment tokens.
+      * @param proof Merkle proof for allowlist minting.
+      * @notice Sale must be active for all tokens.
+      * @dev tokenIds must be sorted ascending without duplicates.
+      * @dev An empty proof is supplied when no proof is required.
+      */
+  
+      const txnHash = await walletClient?.writeContract({
+        account: userAddress,
+        abi: SALES_CONTRACT_ABI,
+        address: SALES_CONTRACT_ADDRESS,
+        functionName: 'mint',
+        args: [
+          userAddress,
+          [BigInt(args.tokenId)],
+          [BigInt(1)],
+          toHex(0),
+          currencyData?.address,
+          price,
+          [toHex(0, { size: 32 })],
+        ]
+      })
+  
+      await publicClient.waitForTransactionReceipt({
+        hash: txnHash as Hex,
+        confirmations: 5
+      })
+      args.closeModal()
+      refechAllowance()
+      clearCachedBalances()
+    } catch (e) {
+      console.error('Failed to purchase...', e)
+    }
 
-    args.closeModal()
-    // after enough confirmations...
-    clearCachedBalances()
     setPurchaseInProgress(false)
   }
 
@@ -186,6 +242,19 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
           </Text>
           <TokenImage size="xs" src={currencyData?.logoURI} />
         </Box>
+        <Box flexDirection="row" gap="1" alignItems="center">
+          <Text variant="small" color="text100">
+            {`Balance: ${balanceFormatted} ${currencyData?.symbol}`}
+          </Text>
+          <TokenImage size="xs" src={currencyData?.logoURI} />
+        </Box>
+        {isNotEnoughFunds && (
+          <Box flexDirection="row" gap="1" alignItems="center">
+            <Text variant="small" color="negative">
+              Not enough funds
+            </Text>
+          </Box>
+        )}
       </Box>
       <Box flexDirection="column" gap="2">
         <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
@@ -197,7 +266,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         <Button
           label="Approve"
           onClick={onClickApprove}
-          disabled={isApproved}
+          disabled={isApproved || isNotEnoughFunds}
           variant="primary"
           shape="square"
           pending={approvalInProgress}
@@ -215,7 +284,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         <Button
           label="Purchase"
           onClick={onClickPurchase}
-          disabled={!isApproved || approvalInProgress}
+          disabled={!isApproved || approvalInProgress || isNotEnoughFunds}
           variant="primary"
           shape="square"
           pending={purchaseInProgress}

@@ -1,3 +1,4 @@
+import type { ContractInfo } from '@0xsequence/indexer'
 import { useReadContract } from 'wagmi'
 
 import {
@@ -9,7 +10,12 @@ import {
 } from '../constants'
 import { SALES_CONTRACT_ABI } from '../constants/abi'
 
-export const useSalesCurrency = () => {
+interface UseSalesCurrencyReturn {
+  data: ContractInfo | undefined
+  isLoading: boolean
+}
+
+export const useSalesCurrency = (): UseSalesCurrencyReturn => {
   const { data: paymentTokenData, isLoading: paymentTokenIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
     functionName: 'paymentToken',
