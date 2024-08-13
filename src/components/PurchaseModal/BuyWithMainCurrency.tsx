@@ -108,7 +108,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       })
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
-        confirmations: 5
+        confirmations: 1
       })
       await refechAllowance()
     } catch (e) {
@@ -163,7 +163,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
   
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
-        confirmations: 5
+        confirmations: 1
       })
       args.closeModal()
       refechAllowance()
