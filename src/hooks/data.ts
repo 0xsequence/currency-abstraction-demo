@@ -76,7 +76,7 @@ export const useCollectionBalance = (args: UseCollectionBalanceArgs) => {
   const indexerClient = useIndexerClient(args.chainId)
 
   return useQuery({
-    queryKey: ['collectionBalance', args],
+    queryKey: ['balances', args],
     queryFn: () => getCollectionBalance(indexerClient, args),
     retry: true,
     staleTime: time.oneSecond * 30,
