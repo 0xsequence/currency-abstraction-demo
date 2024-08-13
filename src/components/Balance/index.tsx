@@ -5,6 +5,7 @@ import { useBalance } from "../../hooks/data";
 import { useSalesCurrency } from "../../hooks/useSalesCurrency";
 import { CHAIN_ID } from "../../constants";
 import { utils as etherUtils } from "ethers";
+import { SwapButton } from "./SwapButton";
 
 export const Balance = () => {
   const isMobile = useMediaQuery("isMobile");
@@ -63,6 +64,7 @@ export const Balance = () => {
           {etherUtils.formatEther(currencyBalance)} {currencyData?.symbol}
         </Text>
       </Box>
+      {currencyData && <SwapButton currencyInfo={currencyData} />}
     </Box>
   );
 };
