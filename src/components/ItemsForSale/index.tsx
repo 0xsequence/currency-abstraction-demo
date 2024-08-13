@@ -5,10 +5,9 @@ import {
   Spinner,
   useMediaQuery
 } from '@0xsequence/design-system'
-import { formatUnits } from 'viem'
 import { useAccount } from 'wagmi'
 
-import { BuyMainCurrencyButton } from './BuyMainCurrencyButton'
+import { BuyMainCurrencyButton } from './BuyButton'
 import { CollectibleTileImage } from '../CollectibleTileImage'
 import { CollectibleCardContent } from './CollectibleCardContent'
 import {
