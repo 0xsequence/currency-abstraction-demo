@@ -70,6 +70,8 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     chainId: args.chainId,
     contractAddress: currencyData?.address || '',
     accountAddress: userAddress || '',
+    // includeMetadata must be false to work around a bug
+    includeMetadata: false
   })
 
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
@@ -79,8 +81,6 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
   const balanceFormatted = formatUnits(balance, currencyData?.decimals || 0)
 
   const isNotEnoughFunds: boolean = price > balance
-
-  console.log('currency balance..', currencyBalanceData)
 
   const isApproved: boolean = (allowanceData as bigint) >= BigInt(price) 
 
