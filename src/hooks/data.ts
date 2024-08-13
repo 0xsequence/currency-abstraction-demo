@@ -1,65 +1,75 @@
-import { SequenceIndexer } from '@0xsequence/indexer'
-import { useQuery } from '@tanstack/react-query'
+import { SequenceIndexer } from "@0xsequence/indexer";
+import { useQuery } from "@tanstack/react-query";
 
-import { useMetadataClient } from '../hooks/useMetadataClient'
-import { useIndexerClient } from '../hooks/useIndexerClient'
+import { useIndexerClient } from "../hooks/useIndexerClient";
+import { useMetadataClient } from "../hooks/useMetadataClient";
 
 export const time = {
   oneSecond: 1 * 1000,
   oneMinute: 60 * 1000,
-  oneHour: 60 * 60 * 1000
-}
+  oneHour: 60 * 60 * 1000,
+};
 
-export const useTokenMetadata = (chainId: number, contractAddress: string, tokenIds: string[]) => {
-  const metadataClient = useMetadataClient()
+export const useTokenMetadata = (
+  chainId: number,
+  contractAddress: string,
+  tokenIds: string[]
+) => {
+  const metadataClient = useMetadataClient();
 
   return useQuery({
-    queryKey: ['tokenMetadata', chainId, contractAddress, tokenIds],
+    queryKey: ["tokenMetadata", chainId, contractAddress, tokenIds],
     queryFn: async () => {
       const res = await metadataClient.getTokenMetadata({
         chainID: String(chainId),
         contractAddress,
-        tokenIDs: tokenIds
-      })
+        tokenIDs: tokenIds,
+      });
 
-      return res.tokenMetadata
+      return res.tokenMetadata;
     },
     retry: true,
     staleTime: time.oneMinute * 10,
-    enabled: !!chainId && !!contractAddress
-  })
-}
+    enabled: !!chainId && !!contractAddress,
+  });
+};
 
-export const useContractInfo = (chainId: number, contractAddress: string | undefined) => {
-  const metadataClient = useMetadataClient()
+export const useContractInfo = (
+  chainId: number,
+  contractAddress: string | undefined
+) => {
+  const metadataClient = useMetadataClient();
 
   return useQuery({
-    queryKey: ['contractInfo', chainId, contractAddress],
+    queryKey: ["contractInfo", chainId, contractAddress],
     queryFn: async () => {
       const res = await metadataClient.getContractInfo({
         chainID: String(chainId),
-        contractAddress: contractAddress || ''
-      })
+        contractAddress: contractAddress || "",
+      });
 
-      return res.contractInfo
+      return res.contractInfo;
     },
     retry: true,
     staleTime: time.oneMinute * 10,
-    enabled: !!chainId && !!contractAddress
-  })
-}
+    enabled: !!chainId && !!contractAddress,
+  });
+};
 
 interface UseBalanceArgs {
-  chainId: number
-  accountAddress: string
-  contractAddress: string
-  includeMetadata?: boolean
-  verifiedOnly?: boolean
+  chainId: number;
+  accountAddress: string;
+  contractAddress: string;
+  includeMetadata?: boolean;
+  verifiedOnly?: boolean;
 }
 
-export const getBalance = async (indexerClient: SequenceIndexer, args: UseBalanceArgs) => {
+export const getBalance = async (
+  indexerClient: SequenceIndexer,
+  args: UseBalanceArgs
+) => {
   if (!args.chainId || !args.accountAddress || !args.contractAddress) {
-    return []
+    return [];
   }
 
   const res = await indexerClient.getTokenBalances({
@@ -67,21 +77,21 @@ export const getBalance = async (indexerClient: SequenceIndexer, args: UseBalanc
     contractAddress: args.contractAddress,
     includeMetadata: args.includeMetadata ?? true,
     metadataOptions: {
-      verifiedOnly: args.verifiedOnly ?? true
-    }
-  })
+      verifiedOnly: args.verifiedOnly ?? true,
+    },
+  });
 
-  return res?.balances || []
-}
+  return res?.balances || [];
+};
 
 export const useBalance = (args: UseBalanceArgs) => {
-  const indexerClient = useIndexerClient(args.chainId)
+  const indexerClient = useIndexerClient(args.chainId);
 
   return useQuery({
-    queryKey: ['balances', args],
+    queryKey: ["balances", args],
     queryFn: () => getBalance(indexerClient, args),
     retry: true,
     staleTime: time.oneSecond * 30,
-    enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress
-  })
-}
+    enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress,
+  });
+};
