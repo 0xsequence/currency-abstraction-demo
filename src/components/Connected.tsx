@@ -11,6 +11,7 @@ import {
 } from '../constants'
 import { useContractInfo } from '../hooks/data'
 import { useSalesCurrency } from '../hooks/useSalesCurrency'
+import { Balance } from './Balance'
 
 export const Connected = () => {
   const { address: userAddress } = useAccount()
@@ -52,6 +53,8 @@ export const Connected = () => {
 
   return (
     <Card justifyContent="center" alignItems="center" width="4" flexDirection="column" gap="3" style={{ width: '100%', maxWidth: 700 }}>
+      <Balance />
+
       <Collapsible label="Collection Info">
         {contractInfoIsLoading ? (
           <Box justifyContent="center" alignItems="center">
