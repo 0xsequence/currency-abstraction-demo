@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    lint:
+      glob: '*.{js,ts,jsx,tsx}'
+      run: pnpm lint {staged_files}
+    format:
+      glob: '*.{js,ts,jsx,tsx}'
+      run: pnpm format {staged_files}
