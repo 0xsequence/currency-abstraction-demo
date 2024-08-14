@@ -23,10 +23,7 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
 
   const fullAmountStr = (BigInt(buyAmount) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
 
-  const {
-    data: swapQuotes,
-    isLoading: swapQuotesIsLoading,
-  } = useSwapQuotes({
+  const { data: swapQuotes, isLoading: swapQuotesIsLoading } = useSwapQuotes({
     userAddress: userAddress ?? '',
     currencyAddress: currencyInfo.address,
     chainId: currencyInfo.chainId,
