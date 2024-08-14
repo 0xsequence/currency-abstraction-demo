@@ -156,6 +156,6 @@ export const useSwapQuotes = (args: UseSwapQuotesArgs) => {
     retry: true,
     staleTime: time.oneMinute,
     enabled:
-      !!args.chainId && !!args.userAddress && !!args.currencyAddress && !!args.currencyAmount && args.currencyAmount !== '0'
+      !!args.chainId || !!args.userAddress || !!args.currencyAddress || !!args.currencyAmount || args.currencyAmount !== '0'
   })
 }
