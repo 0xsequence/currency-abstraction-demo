@@ -32,7 +32,6 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
   })
 
   const onClickSwap = async (swapQuote: SwapQuote) => {
-    console.log('Swap', swapQuote)
     if (!walletClient || !userAddress || !publicClient) {
       return
     }
