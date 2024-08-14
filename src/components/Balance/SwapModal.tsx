@@ -91,6 +91,16 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
       )
     }
 
+    if (swapQuotes?.length === 0) {
+      return (
+        <Box width="full" justifyContent="center" alignItems="center" paddingTop="5">
+          <Text variant="normal" color="text100">
+            No swap quotes found
+          </Text>
+        </Box>
+      )
+    }
+
     return (
       <>
         {!swapQuotesIsLoading &&

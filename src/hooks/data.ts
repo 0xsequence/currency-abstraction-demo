@@ -126,6 +126,10 @@ const getSwapQuotes = async (
     includeApprove: true
   })
 
+  if (res.swapQuotes === null) {
+    return []
+  }
+ 
   const currencyInfoMap = new Map<string, Promise<ContractInfo | undefined>>()
   if (args.withContractInfo) {
     res?.swapQuotes.forEach(quote => {
@@ -150,12 +154,13 @@ export const useSwapQuotes = (args: UseSwapQuotesArgs) => {
   const apiClient = useAPIClient()
   const metadataClient = useMetadataClient()
 
+  const enabled = !!args.chainId && !!args.userAddress && !!args.currencyAddress && !!args.currencyAmount && args.currencyAmount !== '0'
+
   return useQuery({
     queryKey: ['swapQuotes', args],
     queryFn: () => getSwapQuotes(apiClient, metadataClient, args),
     retry: true,
     staleTime: time.oneMinute,
-    enabled:
-      !!args.chainId || !!args.userAddress || !!args.currencyAddress || !!args.currencyAmount || args.currencyAmount !== '0'
+    enabled
   })
 }
