@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { Box, Button, Card, Spinner, Text, TokenImage, CheckmarkIcon, CloseIcon } from '@0xsequence/design-system'
+import {
+  Box,
+  Button,
+  Card,
+  Spinner,
+  Text,
+  TokenImage,
+  CheckmarkIcon,
+  CloseIcon,
+  useMediaQuery
+} from '@0xsequence/design-system'
 import { formatUnits, zeroAddress, Hex, toHex } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
@@ -24,6 +34,7 @@ interface TokenSaleDetailsData {
 }
 
 export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
+  const isMobile = useMediaQuery('isMobile')
   const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
   const { address: userAddress } = useAccount()
   const { clearCachedBalances } = useClearCachedBalances()
@@ -66,8 +77,9 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
   const priceFormatted = formatUnits(BigInt(price), currencyData?.decimals || 0)
 
-  const balance = BigInt(currencyBalanceData?.[0]?.balance || '0')
-  const balanceFormatted = formatUnits(balance, currencyData?.decimals || 0)
+  const balance: bigint = BigInt(currencyBalanceData?.[0]?.balance || '0')
+  let balanceFormatted = Number(formatUnits(balance, currencyData?.decimals || 0))
+  balanceFormatted = Math.trunc(Number(balanceFormatted) * 10000)/10000
 
   const isNotEnoughFunds: boolean = price > balance
 
@@ -170,7 +182,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         alignItems="center"
         justifyContent="center"
         style={{
-          height: '200px'
+          minHeight: '200px'
         }}
       >
         <Spinner />
@@ -191,43 +203,64 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
   return (
     <Card
       width="full"
-      flexDirection="row"
+      flexDirection={isMobile ? "column" : "row"}
       alignItems="center"
       justifyContent="space-between"
+      gap={isMobile ? '2' : '0'}
       style={{
-        height: '200px'
+        minHeight: '200px'
       }}
     >
-      <Box flexDirection="column" gap="2" justifyContent="flex-start">
-        <Box>
+      <Box
+        flexDirection="column"
+        gap="2"
+        justifyContent={isMobile ? "center" : "flex-start"}
+        style={{ ...(isMobile ? { width: '200px' } : {}) }}
+      >
+        <Box
+          justifyContent={isMobile ? "center" : "flex-start"}
+        >
           <Text color="text100">Buy With {currencyData?.name}</Text>
         </Box>
-        <Box flexDirection="row" gap="1" alignItems="center">
+        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? "center" : "flex-start"}>
           <Text variant="small" color="text100">
             {`Price: ${priceFormatted} ${currencyData?.symbol}`}
           </Text>
           <TokenImage size="xs" src={currencyData?.logoURI} />
         </Box>
-        <Box flexDirection="row" gap="1" alignItems="center">
+        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? "center" : "flex-start"}>
           <Text variant="small" color="text100">
             {`Balance: ${balanceFormatted} ${currencyData?.symbol}`}
           </Text>
           <TokenImage size="xs" src={currencyData?.logoURI} />
         </Box>
         {isNotEnoughFunds && (
-          <Box flexDirection="row" gap="1" alignItems="center">
+          <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? "center" : "flex-start"}>
             <Text variant="small" color="negative">
               Not enough funds
             </Text>
           </Box>
         )}
       </Box>
-      <Box flexDirection="column" gap="2">
-        <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
+      <Box
+        flexDirection="column"
+        gap="2"
+        style={{ ...(isMobile ? { width: '200px' } : {}) }}
+        alignItems={isMobile ? "center" : "flex-start"}
+      >
+        <Box
+          flexDirection="row"
+          alignItems="center"
+          gap="1"
+        >
           <Text variant="normal" color="text100">
             Step 1: Approve Currency
           </Text>
-          <Box justifyContent="center" alignItems="center" style={{ width: '24px', height: '24px' }}>
+          <Box
+            justifyContent="center"
+            alignItems="center"
+            style={{ width: '24px', height: '24px' }}
+          >
             <ApprovalStatusIcon />
           </Box>
         </Box>
@@ -240,12 +273,17 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
           pending={approvalInProgress}
         />
       </Box>
-      <Box flexDirection="column" gap="2">
+      <Box
+        flexDirection="column"
+        gap="2"
+        alignItems={isMobile ? "center" : "flex-start"}
+        style={{ ...(isMobile ? { width: '200px' } : {}) }}
+      >
         <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
           <Text variant="normal" color="text100">
             Step 2: Purchase
           </Text>
-          <Box justifyContent="center" alignItems="center" style={{ width: '24px', height: '24px' }}>
+          <Box justifyContent="center" alignItems="center" style={{ height: '24px' }}>
             {purchaseInProgress && <Spinner size="sm" />}
           </Box>
         </Box>
