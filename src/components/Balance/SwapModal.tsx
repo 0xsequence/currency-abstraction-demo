@@ -1,10 +1,10 @@
+import { SwapQuote } from '@0xsequence/api'
 import { Box, Button, NumericInput, Text } from '@0xsequence/design-system'
 import { ContractInfo } from '@0xsequence/indexer'
 import { utils as etherUtils } from 'ethers'
 import { useState } from 'react'
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import { useSwapQuotes } from '../../hooks/data'
-import { SwapQuote } from '../../hooks/useAPIClient'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
 interface SwapModalProps {

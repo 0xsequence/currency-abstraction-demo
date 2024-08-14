@@ -1,10 +1,11 @@
 import { SequenceIndexer } from '@0xsequence/indexer'
 import { useQuery } from '@tanstack/react-query'
 
-import { ExtendedSequenceAPIClient, SwapQuote, useAPIClient } from '../hooks/useAPIClient'
+import { SequenceAPIClient, SwapQuote } from '@0xsequence/api'
+import { ContractInfo, SequenceMetadata } from '@0xsequence/metadata'
+import { useAPIClient } from '../hooks/useAPIClient'
 import { useIndexerClient } from '../hooks/useIndexerClient'
 import { useMetadataClient } from '../hooks/useMetadataClient'
-import { ContractInfo, SequenceMetadata } from '@0xsequence/metadata'
 
 export const time = {
   oneSecond: 1 * 1000,
@@ -112,7 +113,7 @@ type SwapQuotesWithCurrencyInfo = {
 }
 
 const getSwapQuotes = async (
-  apiClient: ExtendedSequenceAPIClient,
+  apiClient: SequenceAPIClient,
   metadataClient: SequenceMetadata,
   args: UseSwapQuotesArgs
 ): Promise<SwapQuotesWithCurrencyInfo[]> => {
