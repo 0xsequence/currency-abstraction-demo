@@ -23,16 +23,16 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
 
   const fullAmountStr = (BigInt(buyAmount) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
 
-  const { data: swapQuotes, isLoading: swapQuotesIsLoading, error } = useSwapQuotes({
+  const {
+    data: swapQuotes,
+    isLoading: swapQuotesIsLoading,
+  } = useSwapQuotes({
     userAddress: userAddress ?? '',
     currencyAddress: currencyInfo.address,
     chainId: currencyInfo.chainId,
     currencyAmount: fullAmountStr,
     withContractInfo: true
   })
-
-
-  console.log('currency info,,,', currencyInfo, fullAmountStr, swapQuotes, error)
 
   const onClickSwap = async (swapQuote: SwapQuote) => {
     if (!walletClient || !userAddress || !publicClient) {
@@ -82,7 +82,7 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
           <Text variant="normal" color="text100">
             Select {currencyInfo?.name || 'currency'} amount
           </Text>
-        </Box> 
+        </Box>
       )
     }
 
@@ -96,27 +96,27 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
 
     return (
       <>
-      {!swapQuotesIsLoading &&
-        swapQuotes &&
-        swapQuotes?.map(quote => {
-          const currName = quote.info ? `${quote.info.name} (${quote.info.symbol})` : quote.quote.currencyAddress
-          return (
-            <Box
-              key={`swapQuote-${quote.quote.transactionData}`}
-              flexDirection="row"
-              width={'full'}
-              justifyContent={'space-between'}
-              alignItems="center"
-              gap="1"
-            >
-              <Text color="text100">
-                {etherUtils.formatEther(quote.quote.price)} {currName}
-              </Text>
-              <Button label="Swap" onClick={() => onClickSwap(quote.quote)} variant="primary" disabled={swapInProgress} />
-            </Box>
-          )
-        })}
-      </> 
+        {!swapQuotesIsLoading &&
+          swapQuotes &&
+          swapQuotes?.map(quote => {
+            const currName = quote.info ? `${quote.info.name} (${quote.info.symbol})` : quote.quote.currencyAddress
+            return (
+              <Box
+                key={`swapQuote-${quote.quote.transactionData}`}
+                flexDirection="row"
+                width={'full'}
+                justifyContent={'space-between'}
+                alignItems="center"
+                gap="1"
+              >
+                <Text color="text100">
+                  {etherUtils.formatEther(quote.quote.price)} {currName}
+                </Text>
+                <Button label="Swap" onClick={() => onClickSwap(quote.quote)} variant="primary" disabled={swapInProgress} />
+              </Box>
+            )
+          })}
+      </>
     )
   }
 

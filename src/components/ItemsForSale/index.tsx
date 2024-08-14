@@ -52,13 +52,14 @@ export const ItemsForSale = ({ collectionAddress, chainId }: ItemsForSaleProps) 
         width: 'calc(100% + 8px)'
       }}
     >
-      {tokenMetadatas?.map(tokenMetadata => {
+      {tokenMetadatas?.map((tokenMetadata, index) => {
         const collectibleBalance = collectionBalanceData?.find(balance => balance?.tokenID === tokenMetadata.tokenId)
 
         const amountOwned: string = collectibleBalance?.balance || '0'
 
         return (
           <Box
+            key={tokenMetadata?.tokenId || index}
             padding="1"
             width="full"
             flexDirection="column"
