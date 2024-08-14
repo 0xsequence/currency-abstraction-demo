@@ -3,12 +3,7 @@ import { Hex } from 'viem'
 import { useAccount, useDisconnect } from 'wagmi'
 
 import { ItemsForSale } from './ItemsForSale'
-import {
-  NFT_TOKEN_ADDRESS,
-  SALES_CONTRACT_ADDRESS,
-  CHAIN_ID,
-  ETHERSCAN_URL,
-} from '../constants'
+import { NFT_TOKEN_ADDRESS, SALES_CONTRACT_ADDRESS, CHAIN_ID, ETHERSCAN_URL } from '../constants'
 import { useContractInfo } from '../hooks/data'
 import { useSalesCurrency } from '../hooks/useSalesCurrency'
 import { Balance } from './Balance'
@@ -19,18 +14,12 @@ export const Connected = () => {
   const { data: contractInfoData, isLoading: contractInfoIsLoading } = useContractInfo(CHAIN_ID, NFT_TOKEN_ADDRESS)
   const { data: currencyData } = useSalesCurrency()
 
-  const AddressDisplay = ({
-    label,
-    address
-  }: { label: string; address: string | Hex | undefined }) => {
+  const AddressDisplay = ({ label, address }: { label: string; address: string | Hex | undefined }) => {
     const isMobile = useMediaQuery('isMobile')
 
     return (
-      <Box
-        justifyContent="space-between"
-        {...(isMobile ? { flexDirection: 'column' } : {})}
-      >
-        <Text variant="normal" color="text100" style={{ minWidth: 205}}>
+      <Box justifyContent="space-between" {...(isMobile ? { flexDirection: 'column' } : {})}>
+        <Text variant="normal" color="text100" style={{ minWidth: 205 }}>
           {label}: &nbsp;
         </Text>
         <Text
@@ -52,7 +41,14 @@ export const Connected = () => {
   const collectionDescription = contractInfoData?.extensions?.description
 
   return (
-    <Card justifyContent="center" alignItems="center" width="4" flexDirection="column" gap="3" style={{ width: '100%', maxWidth: 700 }}>
+    <Card
+      justifyContent="center"
+      alignItems="center"
+      width="4"
+      flexDirection="column"
+      gap="3"
+      style={{ width: '100%', maxWidth: 700 }}
+    >
       <Balance />
 
       <Collapsible label="Collection Info">
@@ -63,39 +59,25 @@ export const Connected = () => {
         ) : (
           <Box gap="2" flexDirection="column">
             <Box gap="1" flexDirection="column">
-              <Text
-                variant="normal"
-                color="text100"
-                style={{ fontWeight: '700' }}
-              >
+              <Text variant="normal" color="text100" style={{ fontWeight: '700' }}>
                 Name:
               </Text>
-              <Text
-                variant="normal"
-                color="text100" 
-              >
+              <Text variant="normal" color="text100">
                 {collectionName}
               </Text>
             </Box>
             <Box gap="1" flexDirection="column">
-              <Text
-                variant="normal"
-                color="text100"
-                style={{ fontWeight: '700' }}
-              >
+              <Text variant="normal" color="text100" style={{ fontWeight: '700' }}>
                 Description:
               </Text>
-              <Text
-                variant="normal"
-                color="text100" 
-              >
+              <Text variant="normal" color="text100">
                 {collectionDescription}
               </Text>
             </Box>
           </Box>
         )}
       </Collapsible>
-      
+
       <Collapsible label="Stuff for Nerds">
         <Box gap="1" flexDirection="column">
           <AddressDisplay label="User Address" address={userAddress} />
@@ -104,7 +86,7 @@ export const Connected = () => {
           <AddressDisplay label="Payment currency Address" address={currencyData?.address || ''} />
         </Box>
       </Collapsible>
-      
+
       <ItemsForSale chainId={CHAIN_ID} collectionAddress={NFT_TOKEN_ADDRESS} />
 
       <Button label="Disconnect" onClick={disconnect} />

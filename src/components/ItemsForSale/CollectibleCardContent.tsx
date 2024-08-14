@@ -2,10 +2,7 @@ import { Box, Text, TokenImage, Skeleton } from '@0xsequence/design-system'
 import { formatUnits } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import {  
-  SALES_CONTRACT_ADDRESS,
-  CHAIN_ID
-} from '../../constants'
+import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
 import { SALES_CONTRACT_ABI } from '../../constants/abi'
 
 interface CollectibleCardContentProps {
@@ -20,13 +17,7 @@ interface TokenSaleDetailsData {
   cost: bigint
 }
 
-export const CollectibleCardContent = ({
-  tokenId,
-  amountOwned,
-  logoURI,
-  name,
-  decimals,
-}: CollectibleCardContentProps) => {
+export const CollectibleCardContent = ({ tokenId, amountOwned, logoURI, name, decimals }: CollectibleCardContentProps) => {
   const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
     functionName: 'tokenSaleDetails',
@@ -54,9 +45,7 @@ export const CollectibleCardContent = ({
         {tokenSaleDetailsDataIsLoading && <Skeleton style={{ width: 20, height: 16 }} />}
         <TokenImage size="xs" src={logoURI} />
       </Box>
-      <Text color="text100">
-        {name}
-      </Text>
+      <Text color="text100">{name}</Text>
     </>
   )
 }

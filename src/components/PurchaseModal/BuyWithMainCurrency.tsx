@@ -1,14 +1,5 @@
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  Card,
-  Spinner,
-  Text,
-  TokenImage,
-  CheckmarkIcon,
-  CloseIcon
-} from '@0xsequence/design-system'
+import { Box, Button, Card, Spinner, Text, TokenImage, CheckmarkIcon, CloseIcon } from '@0xsequence/design-system'
 import { formatUnits, zeroAddress, Hex, toHex } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
@@ -16,14 +7,8 @@ import { useBalance } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
-import {  
-  SALES_CONTRACT_ADDRESS,
-  CHAIN_ID
-} from '../../constants'
-import {
-  SALES_CONTRACT_ABI,
-  ERC_20_CONTRACT_ABI
-} from '../../constants/abi'
+import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
+import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abi'
 
 interface BuyWithMainCurrencyProps {
   tokenId: string
@@ -55,7 +40,11 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     args: [BigInt(args.tokenId)]
   })
 
-  const { data: allowanceData, isLoading: allowanceIsLoading, refetch: refechAllowance } = useReadContract({
+  const {
+    data: allowanceData,
+    isLoading: allowanceIsLoading,
+    refetch: refechAllowance
+  } = useReadContract({
     abi: ERC_20_CONTRACT_ABI,
     functionName: 'allowance',
     chainId: CHAIN_ID,
@@ -82,7 +71,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
   const isNotEnoughFunds: boolean = price > balance
 
-  const isApproved: boolean = (allowanceData as bigint) >= BigInt(price) 
+  const isApproved: boolean = (allowanceData as bigint) >= BigInt(price)
 
   const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading
 
@@ -90,7 +79,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     if (!walletClient || !userAddress || !publicClient) {
       return
     }
-    
+
     setApprovalInProgress(true)
 
     try {
@@ -104,7 +93,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         abi: ERC_20_CONTRACT_ABI,
         address: currencyData!.address as Hex,
         functionName: 'approve',
-        args: [SALES_CONTRACT_ADDRESS, price],
+        args: [SALES_CONTRACT_ADDRESS, price]
       })
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
@@ -130,37 +119,29 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       if (walletClientChainId !== args.chainId) {
         await walletClient.switchChain({ id: args.chainId })
       }
-  
+
       /*   **
-      * Mint tokens.
-      * @param to Address to mint tokens to.
-      * @param tokenIds Token IDs to mint.
-      * @param amounts Amounts of tokens to mint.
-      * @param data Data to pass if receiver is contract.
-      * @param expectedPaymentToken ERC20 token address to accept payment in. address(0) indicates ETH.
-      * @param maxTotal Maximum amount of payment tokens.
-      * @param proof Merkle proof for allowlist minting.
-      * @notice Sale must be active for all tokens.
-      * @dev tokenIds must be sorted ascending without duplicates.
-      * @dev An empty proof is supplied when no proof is required.
-      */
-  
+       * Mint tokens.
+       * @param to Address to mint tokens to.
+       * @param tokenIds Token IDs to mint.
+       * @param amounts Amounts of tokens to mint.
+       * @param data Data to pass if receiver is contract.
+       * @param expectedPaymentToken ERC20 token address to accept payment in. address(0) indicates ETH.
+       * @param maxTotal Maximum amount of payment tokens.
+       * @param proof Merkle proof for allowlist minting.
+       * @notice Sale must be active for all tokens.
+       * @dev tokenIds must be sorted ascending without duplicates.
+       * @dev An empty proof is supplied when no proof is required.
+       */
+
       const txnHash = await walletClient?.writeContract({
         account: userAddress,
         abi: SALES_CONTRACT_ABI,
         address: SALES_CONTRACT_ADDRESS,
         functionName: 'mint',
-        args: [
-          userAddress,
-          [BigInt(args.tokenId)],
-          [BigInt(1)],
-          toHex(0),
-          currencyData?.address,
-          price,
-          [toHex(0, { size: 32 })],
-        ]
+        args: [userAddress, [BigInt(args.tokenId)], [BigInt(1)], toHex(0), currencyData?.address, price, [toHex(0, { size: 32 })]]
       })
-  
+
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
         confirmations: 1
@@ -175,20 +156,11 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     setPurchaseInProgress(false)
   }
 
+  const SuccessIcon = () => <CheckmarkIcon color="positive" />
 
-  const SuccessIcon = () => (
-    <CheckmarkIcon
-      color="positive"
-    />
-  )
+  const ErrorIcon = () => <CloseIcon color="negative" />
 
-  const ErrorIcon = () => (
-    <CloseIcon color="negative" />
-  )
-
-  const LoadingIcon = () => (
-    <Spinner size="sm" />
-  )
+  const LoadingIcon = () => <Spinner size="sm" />
 
   if (isLoading) {
     return (
@@ -208,19 +180,13 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
   const ApprovalStatusIcon = () => {
     if (approvalInProgress) {
-      return (
-        <LoadingIcon />
-      )
+      return <LoadingIcon />
     } else if (isApproved || purchaseInProgress) {
-      return (
-        <SuccessIcon />
-      )
+      return <SuccessIcon />
     } else {
-      return (
-        <ErrorIcon />
-      )
+      return <ErrorIcon />
     }
-  } 
+  }
 
   return (
     <Card
@@ -258,7 +224,9 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       </Box>
       <Box flexDirection="column" gap="2">
         <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
-          <Text variant="normal" color="text100">Step 1: Approve Currency</Text>
+          <Text variant="normal" color="text100">
+            Step 1: Approve Currency
+          </Text>
           <Box justifyContent="center" alignItems="center" style={{ width: '24px', height: '24px' }}>
             <ApprovalStatusIcon />
           </Box>
@@ -274,11 +242,11 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       </Box>
       <Box flexDirection="column" gap="2">
         <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
-          <Text variant="normal" color="text100">Step 2: Purchase</Text>
+          <Text variant="normal" color="text100">
+            Step 2: Purchase
+          </Text>
           <Box justifyContent="center" alignItems="center" style={{ width: '24px', height: '24px' }}>
-            {
-              purchaseInProgress && <Spinner size="sm" />
-            }            
+            {purchaseInProgress && <Spinner size="sm" />}
           </Box>
         </Box>
         <Button

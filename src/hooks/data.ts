@@ -1,44 +1,36 @@
-import { SequenceIndexer } from "@0xsequence/indexer";
-import { useQuery } from "@tanstack/react-query";
+import { SequenceIndexer } from '@0xsequence/indexer'
+import { useQuery } from '@tanstack/react-query'
 
-import {
-  ExtendedSequenceAPIClient,
-  SwapQuote,
-  useAPIClient,
-} from "../hooks/useAPIClient";
-import { useIndexerClient } from "../hooks/useIndexerClient";
-import { useMetadataClient } from "../hooks/useMetadataClient";
-import { ContractInfo, SequenceMetadata } from "@0xsequence/metadata";
+import { ExtendedSequenceAPIClient, SwapQuote, useAPIClient } from '../hooks/useAPIClient'
+import { useIndexerClient } from '../hooks/useIndexerClient'
+import { useMetadataClient } from '../hooks/useMetadataClient'
+import { ContractInfo, SequenceMetadata } from '@0xsequence/metadata'
 
 export const time = {
   oneSecond: 1 * 1000,
   oneMinute: 60 * 1000,
-  oneHour: 60 * 60 * 1000,
-};
+  oneHour: 60 * 60 * 1000
+}
 
-export const useTokenMetadata = (
-  chainId: number,
-  contractAddress: string,
-  tokenIds: string[]
-) => {
-  const metadataClient = useMetadataClient();
+export const useTokenMetadata = (chainId: number, contractAddress: string, tokenIds: string[]) => {
+  const metadataClient = useMetadataClient()
 
   return useQuery({
-    queryKey: ["tokenMetadata", chainId, contractAddress, tokenIds],
+    queryKey: ['tokenMetadata', chainId, contractAddress, tokenIds],
     queryFn: async () => {
       const res = await metadataClient.getTokenMetadata({
         chainID: String(chainId),
         contractAddress,
-        tokenIDs: tokenIds,
-      });
+        tokenIDs: tokenIds
+      })
 
-      return res.tokenMetadata;
+      return res.tokenMetadata
     },
     retry: true,
     staleTime: time.oneMinute * 10,
-    enabled: !!chainId && !!contractAddress,
-  });
-};
+    enabled: !!chainId && !!contractAddress
+  })
+}
 
 const getContractInfo = async (
   metadataClient: SequenceMetadata,
@@ -46,47 +38,40 @@ const getContractInfo = async (
   contractAddress: string
 ): Promise<ContractInfo | undefined> => {
   if (!chainId || !contractAddress) {
-    return undefined;
+    return undefined
   }
 
   const res = await metadataClient.getContractInfo({
     chainID: String(chainId),
-    contractAddress,
-  });
+    contractAddress
+  })
 
-  return res.contractInfo;
-};
-
-export const useContractInfo = (
-  chainId: number,
-  contractAddress: string | undefined
-) => {
-  const metadataClient = useMetadataClient();
-
-  return useQuery({
-    queryKey: ["contractInfo", chainId, contractAddress],
-    queryFn: () =>
-      getContractInfo(metadataClient, chainId, contractAddress || ""),
-    retry: true,
-    staleTime: time.oneMinute * 10,
-    enabled: !!chainId && !!contractAddress,
-  });
-};
-
-interface UseBalanceArgs {
-  chainId: number;
-  accountAddress: string;
-  contractAddress: string;
-  includeMetadata?: boolean;
-  verifiedOnly?: boolean;
+  return res.contractInfo
 }
 
-export const getBalance = async (
-  indexerClient: SequenceIndexer,
-  args: UseBalanceArgs
-) => {
+export const useContractInfo = (chainId: number, contractAddress: string | undefined) => {
+  const metadataClient = useMetadataClient()
+
+  return useQuery({
+    queryKey: ['contractInfo', chainId, contractAddress],
+    queryFn: () => getContractInfo(metadataClient, chainId, contractAddress || ''),
+    retry: true,
+    staleTime: time.oneMinute * 10,
+    enabled: !!chainId && !!contractAddress
+  })
+}
+
+interface UseBalanceArgs {
+  chainId: number
+  accountAddress: string
+  contractAddress: string
+  includeMetadata?: boolean
+  verifiedOnly?: boolean
+}
+
+export const getBalance = async (indexerClient: SequenceIndexer, args: UseBalanceArgs) => {
   if (!args.chainId || !args.accountAddress || !args.contractAddress) {
-    return [];
+    return []
   }
 
   const res = await indexerClient.getTokenBalances({
@@ -94,95 +79,82 @@ export const getBalance = async (
     contractAddress: args.contractAddress,
     includeMetadata: args.includeMetadata ?? true,
     metadataOptions: {
-      verifiedOnly: args.verifiedOnly ?? true,
-    },
-  });
+      verifiedOnly: args.verifiedOnly ?? true
+    }
+  })
 
-  return res?.balances || [];
-};
+  return res?.balances || []
+}
 
 export const useBalance = (args: UseBalanceArgs) => {
-  const indexerClient = useIndexerClient(args.chainId);
+  const indexerClient = useIndexerClient(args.chainId)
 
   return useQuery({
-    queryKey: ["balances", args],
+    queryKey: ['balances', args],
     queryFn: () => getBalance(indexerClient, args),
     retry: true,
     staleTime: time.oneSecond * 30,
-    enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress,
-  });
-};
+    enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress
+  })
+}
 
 interface UseSwapQuotesArgs {
-  userAddress: string;
-  currencyAddress: string;
-  currencyAmount: string;
-  chainId: number;
-  withContractInfo?: boolean;
+  userAddress: string
+  currencyAddress: string
+  currencyAmount: string
+  chainId: number
+  withContractInfo?: boolean
 }
 
 type SwapQuotesWithCurrencyInfo = {
-  quote: SwapQuote;
-  info: ContractInfo | undefined;
-};
+  quote: SwapQuote
+  info: ContractInfo | undefined
+}
 
 const getSwapQuotes = async (
   apiClient: ExtendedSequenceAPIClient,
   metadataClient: SequenceMetadata,
   args: UseSwapQuotesArgs
 ): Promise<SwapQuotesWithCurrencyInfo[]> => {
-  if (
-    !args.chainId ||
-    !args.userAddress ||
-    !args.currencyAddress ||
-    !args.currencyAmount ||
-    args.currencyAmount === "0"
-  ) {
-    return [];
+  if (!args.chainId || !args.userAddress || !args.currencyAddress || !args.currencyAmount || args.currencyAmount === '0') {
+    return []
   }
 
   const res = await apiClient.getSwapQuotes({
     ...args,
-    includeApprove: true,
-  });
+    includeApprove: true
+  })
 
-  const currencyInfoMap = new Map<string, Promise<ContractInfo | undefined>>();
+  const currencyInfoMap = new Map<string, Promise<ContractInfo | undefined>>()
   if (args.withContractInfo) {
-    res?.swapQuotes.forEach((quote) => {
-      const { currencyAddress } = quote;
+    res?.swapQuotes.forEach(quote => {
+      const { currencyAddress } = quote
       if (currencyAddress && !currencyInfoMap.has(currencyAddress)) {
-        currencyInfoMap.set(
-          currencyAddress,
-          getContractInfo(metadataClient, args.chainId, currencyAddress)
-        );
+        currencyInfoMap.set(currencyAddress, getContractInfo(metadataClient, args.chainId, currencyAddress))
       }
-    });
+    })
   }
 
   return Promise.all(
-    res?.swapQuotes.map(async (quote) => ({
+    res?.swapQuotes.map(async quote => ({
       quote,
-      info: (await currencyInfoMap.get(quote.currencyAddress)) || undefined,
+      info: (await currencyInfoMap.get(quote.currencyAddress)) || undefined
     })) || []
-  );
-};
+  )
+}
 
 //TODO Cancel request when values are changed
 
 export const useSwapQuotes = (args: UseSwapQuotesArgs) => {
-  const apiClient = useAPIClient();
-  const metadataClient = useMetadataClient();
+  const apiClient = useAPIClient()
+  const metadataClient = useMetadataClient()
 
   return useQuery({
-    queryKey: ["swapQuotes", args],
+    queryKey: ['swapQuotes', args],
     queryFn: () => getSwapQuotes(apiClient, metadataClient, args),
     retry: true,
     staleTime: time.oneMinute,
     enabled:
-      !!args.chainId &&
-      !!args.userAddress &&
-      !!args.currencyAddress &&
-      !!args.currencyAmount &&
-      args.currencyAmount !== "0",
-  });
-};
+      !!args.chainId && !!args.userAddress && !!args.currencyAddress && !!args.currencyAmount && args.currencyAmount !== '0'
+  })
+}

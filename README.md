@@ -28,7 +28,6 @@ These instructions are for those who want to understand the entire end to end pr
 > For the purposes of this demo, contracts are deployed on the Sepolia testnet.
 > We use Sepolia as it is supported by ZeroX, Uniswap and has a well funded faucet for obtaining testnet ETH.
 
-
 ### Builder Configuration
 
 Navigate to [Sequence Builder][0] and create a new project.
@@ -85,7 +84,6 @@ Navigate to the Sale contract, select the Mint Access tab, and set the parameter
 > [!IMPORTANT]
 > If the current time is within the date range provided, this will activate the sale.
 > Consider setting the date range to the future or performing this step after completing the rest of the configuration.
-
 
 ### Uniswap Configuration
 

@@ -1,34 +1,19 @@
-import { 
-  Box,
-  Card,
-  Text,
-  Spinner,
-  useMediaQuery
-} from '@0xsequence/design-system'
+import { Box, Card, Text, Spinner, useMediaQuery } from '@0xsequence/design-system'
 import { useAccount } from 'wagmi'
 
 import { BuyMainCurrencyButton } from './BuyButton'
 import { CollectibleTileImage } from '../CollectibleTileImage'
 import { CollectibleCardContent } from './CollectibleCardContent'
-import {
-  useTokenMetadata,
-  useBalance,
-} from '../../hooks/data'
+import { useTokenMetadata, useBalance } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
-import {  
-  itemsForSales,
-  NFT_TOKEN_ADDRESS,
-} from '../../constants'
+import { itemsForSales, NFT_TOKEN_ADDRESS } from '../../constants'
 
 interface ItemsForSaleProps {
   collectionAddress: string
   chainId: number
 }
 
-export const ItemsForSale = ({
-  collectionAddress,
-  chainId
-}: ItemsForSaleProps) => {
+export const ItemsForSale = ({ collectionAddress, chainId }: ItemsForSaleProps) => {
   const isMobile = useMediaQuery('isMobile')
   const { address: userAddress } = useAccount()
   const { data: collectionBalanceData, isLoading: collectionBalanceIsLoading } = useBalance({
@@ -51,14 +36,7 @@ export const ItemsForSale = ({
 
   if (isLoading) {
     return (
-      <Box
-        margin="2"
-        color="text100"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        gap="2"
-      >
+      <Box margin="2" color="text100" flexDirection="column" justifyContent="center" alignItems="center" gap="2">
         <Text color="text100">Loading...</Text>
         <Spinner />
       </Box>
@@ -67,7 +45,7 @@ export const ItemsForSale = ({
 
   return (
     <Box
-      flexDirection={"row"}
+      flexDirection={'row'}
       alignItems="center"
       flexWrap="wrap"
       style={{
@@ -75,9 +53,7 @@ export const ItemsForSale = ({
       }}
     >
       {tokenMetadatas?.map(tokenMetadata => {
-        const collectibleBalance = collectionBalanceData?.find(balance => (
-          balance?.tokenID === tokenMetadata.tokenId 
-        ))
+        const collectibleBalance = collectionBalanceData?.find(balance => balance?.tokenID === tokenMetadata.tokenId)
 
         const amountOwned: string = collectibleBalance?.balance || '0'
 
@@ -103,11 +79,7 @@ export const ItemsForSale = ({
                 />
               </Box>
               <Box marginTop="1">
-                <BuyMainCurrencyButton
-                  chainId={chainId}
-                  collectionAddress={NFT_TOKEN_ADDRESS}
-                  tokenId={tokenMetadata.tokenId}
-                />
+                <BuyMainCurrencyButton chainId={chainId} collectionAddress={NFT_TOKEN_ADDRESS} tokenId={tokenMetadata.tokenId} />
               </Box>
             </Card>
           </Box>

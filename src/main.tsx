@@ -6,11 +6,10 @@ import { Providers } from './components/Providers.tsx'
 import './main.css'
 import '@0xsequence/design-system/styles.css'
 
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Providers>
       <App />
     </Providers>
-  </React.StrictMode>,
+  </React.StrictMode>
 )

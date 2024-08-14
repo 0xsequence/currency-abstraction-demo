@@ -9,25 +9,10 @@ interface PurchaseModalProps {
   closeModal: () => void
 }
 
-export const PurchaseModal = ({
-  tokenId,
-  collectionAddress,
-  chainId,
-  closeModal,
-}: PurchaseModalProps) => {
+export const PurchaseModal = ({ tokenId, collectionAddress, chainId, closeModal }: PurchaseModalProps) => {
   return (
-    <Box
-      padding={"4"}
-      paddingTop="12"
-      flexDirection="column"
-      gap="5"
-    >
-      <BuyWithMainCurrency
-        tokenId={tokenId}
-        collectionAddress={collectionAddress}
-        chainId={chainId}
-        closeModal={closeModal}
-      />
+    <Box padding={'4'} paddingTop="12" flexDirection="column" gap="5">
+      <BuyWithMainCurrency tokenId={tokenId} collectionAddress={collectionAddress} chainId={chainId} closeModal={closeModal} />
     </Box>
   )
 }

@@ -1,13 +1,8 @@
 import type { ContractInfo } from '@0xsequence/indexer'
 import { useReadContract } from 'wagmi'
 
-import {
-  useContractInfo
-} from '../hooks/data'
-import {  
-  CHAIN_ID,
-  SALES_CONTRACT_ADDRESS
-} from '../constants'
+import { useContractInfo } from '../hooks/data'
+import { CHAIN_ID, SALES_CONTRACT_ADDRESS } from '../constants'
 import { SALES_CONTRACT_ABI } from '../constants/abi'
 
 interface UseSalesCurrencyReturn {
@@ -20,18 +15,18 @@ export const useSalesCurrency = (): UseSalesCurrencyReturn => {
     abi: SALES_CONTRACT_ABI,
     functionName: 'paymentToken',
     chainId: CHAIN_ID,
-    address: SALES_CONTRACT_ADDRESS,
+    address: SALES_CONTRACT_ADDRESS
   })
 
-  const paymentTokenAddress = paymentTokenData as string || ''
+  const paymentTokenAddress = (paymentTokenData as string) || ''
 
   const { data: currencyContractInfoData, isLoading: currencyContractInfoIsLoading } = useContractInfo(
     CHAIN_ID,
     paymentTokenAddress
   )
 
-  return ({
+  return {
     data: currencyContractInfoData,
     isLoading: paymentTokenIsLoading || currencyContractInfoIsLoading
-  })
+  }
 }

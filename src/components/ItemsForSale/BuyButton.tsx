@@ -9,30 +9,21 @@ interface BuyMainCurrencyButtonProps {
   chainId: number
 }
 
-export const BuyMainCurrencyButton = ({
-  tokenId,
-  collectionAddress,
-  chainId,
-}: BuyMainCurrencyButtonProps) => {
+export const BuyMainCurrencyButton = ({ tokenId, collectionAddress, chainId }: BuyMainCurrencyButtonProps) => {
   const [purchaseModalIsOpen, setPurchaseModalIsOpen] = useState(false)
 
-  const onClickBuy = () => { 
+  const onClickBuy = () => {
     setPurchaseModalIsOpen(true)
   }
 
   return (
     <>
-      <Button
-        size="sm"
-        variant="primary"
-        label="Purchase"
-        shape="square"
-        width="full"
-        onClick={onClickBuy}
-      />
+      <Button size="sm" variant="primary" label="Purchase" shape="square" width="full" onClick={onClickBuy} />
       {purchaseModalIsOpen && (
         <Modal
-          onClose={() => { setPurchaseModalIsOpen(false) }}
+          onClose={() => {
+            setPurchaseModalIsOpen(false)
+          }}
         >
           <PurchaseModal
             tokenId={tokenId}
@@ -42,7 +33,7 @@ export const BuyMainCurrencyButton = ({
               setPurchaseModalIsOpen(false)
             }}
           />
-        </Modal> 
+        </Modal>
       )}
     </>
   )

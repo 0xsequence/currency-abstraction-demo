@@ -1,41 +1,38 @@
-import { Box, Button, NumericInput, Text } from "@0xsequence/design-system";
-import { ContractInfo } from "@0xsequence/indexer";
-import { utils as etherUtils } from "ethers";
-import { useState } from "react";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import { useSwapQuotes } from "../../hooks/data";
-import { SwapQuote } from "../../hooks/useAPIClient";
+import { Box, Button, NumericInput, Text } from '@0xsequence/design-system'
+import { ContractInfo } from '@0xsequence/indexer'
+import { utils as etherUtils } from 'ethers'
+import { useState } from 'react'
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
+import { useSwapQuotes } from '../../hooks/data'
+import { SwapQuote } from '../../hooks/useAPIClient'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
 interface SwapModalProps {
-  currencyInfo: ContractInfo;
-  closeModal: () => void;
+  currencyInfo: ContractInfo
+  closeModal: () => void
 }
 
 export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
-  const { address: userAddress } = useAccount();
+  const { address: userAddress } = useAccount()
   const { clearCachedBalances } = useClearCachedBalances()
 
-  const [swapInProgress, setSwapInProgress] = useState(false);
-  const [buyAmount, setBuyAmount] = useState(1);
+  const [swapInProgress, setSwapInProgress] = useState(false)
+  const [buyAmount, setBuyAmount] = useState(1)
 
-  const fullAmountStr = (
-    BigInt(buyAmount) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)
-  ).toString();
-
+  const fullAmountStr = (BigInt(buyAmount) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
 
   const { data: swapQuotes, isLoading: swapQuotesIsLoading } = useSwapQuotes({
-    userAddress: userAddress ?? "",
+    userAddress: userAddress ?? '',
     currencyAddress: currencyInfo.address,
     chainId: currencyInfo.chainId,
     currencyAmount: fullAmountStr,
-    withContractInfo: true,
-  });
+    withContractInfo: true
+  })
 
   const onClickSwap = async (swapQuote: SwapQuote) => {
-    console.log("Swap", swapQuote);
+    console.log('Swap', swapQuote)
     if (!walletClient || !userAddress || !publicClient) {
       return
     }
@@ -52,67 +49,59 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
       // Approve
       const approveTxHash = await walletClient.sendTransaction({
         to: swapQuote.currencyAddress as `0x${string}`,
-        data: swapQuote.approveData as `0x${string}`,
+        data: swapQuote.approveData as `0x${string}`
       })
       await publicClient.waitForTransactionReceipt({
         hash: approveTxHash,
-        confirmations: 1,
+        confirmations: 1
       })
 
       // Swap
       const swapTxHash = await walletClient.sendTransaction({
         to: swapQuote.to as `0x${string}`,
-        data: swapQuote.transactionData as `0x${string}`,
+        data: swapQuote.transactionData as `0x${string}`
       })
       await publicClient.waitForTransactionReceipt({
         hash: swapTxHash,
-        confirmations: 1,
+        confirmations: 1
       })
     } catch (e) {
-      console.error("Failed to swap...", e)
+      console.error('Failed to swap...', e)
     }
     clearCachedBalances()
     setSwapInProgress(false)
     closeModal()
-  };
+  }
 
   return (
-    <Box padding={"4"} paddingTop="12" flexDirection="column" gap="5">
+    <Box padding={'4'} paddingTop="12" flexDirection="column" gap="5">
       <Box flexDirection="column" gap="4">
         <NumericInput
           type="number"
           value={buyAmount}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setBuyAmount(parseFloat(e.target?.value || "0"))
-          }
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBuyAmount(parseFloat(e.target?.value || '0'))}
         />
-        {!swapQuotesIsLoading && swapQuotes &&
-          swapQuotes?.map((quote) => {
-            const currName = quote.info
-              ? `${quote.info.name} (${quote.info.symbol})`
-              : quote.quote.currencyAddress;
+        {!swapQuotesIsLoading &&
+          swapQuotes &&
+          swapQuotes?.map(quote => {
+            const currName = quote.info ? `${quote.info.name} (${quote.info.symbol})` : quote.quote.currencyAddress
             return (
               <Box
                 key={`swapQuote-${quote.quote.transactionData}`}
                 flexDirection="row"
-                width={"full"}
-                justifyContent={"space-between"}
+                width={'full'}
+                justifyContent={'space-between'}
                 alignItems="center"
                 gap="1"
               >
                 <Text color="text100">
                   {etherUtils.formatEther(quote.quote.price)} {currName}
                 </Text>
-                <Button
-                  label="Swap"
-                  onClick={() => onClickSwap(quote.quote)}
-                  variant="primary"
-                  disabled={swapInProgress}
-                />
+                <Button label="Swap" onClick={() => onClickSwap(quote.quote)} variant="primary" disabled={swapInProgress} />
               </Box>
-            );
+            )
           })}
       </Box>
     </Box>
-  );
-};
+  )
+}

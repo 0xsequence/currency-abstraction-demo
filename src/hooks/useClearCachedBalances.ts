@@ -4,14 +4,14 @@ interface UseClearCachedBalances {
   clearCachedBalances: () => void
 }
 
-export const useClearCachedBalances= (): UseClearCachedBalances  => {
+export const useClearCachedBalances = (): UseClearCachedBalances => {
   const queryClient = useQueryClient()
 
-  return ({
+  return {
     clearCachedBalances: () => {
       queryClient.invalidateQueries({
         queryKey: ['balances']
       })
     }
-  })
+  }
 }
