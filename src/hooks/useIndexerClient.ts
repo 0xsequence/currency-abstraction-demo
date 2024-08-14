@@ -9,7 +9,7 @@ export const useIndexerClient = (chainId: ChainId) => {
 
   const indexerClients = useMemo(() => {
     return new Map<ChainId, SequenceIndexer>()
-  }, [projectAccessKey])
+  }, [])
 
   const network = networks[chainId]
   const clientUrl = `https://${network.name}-indexer.sequence.app`
