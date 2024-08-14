@@ -27,7 +27,9 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
   const fullAmountStr = (BigInt(buyAmountDebounced) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
 
   const debouncedFnBuyAmount = useRef(
-    _debounce((amount: number) => { setBuyAmountDebounced(amount) }, 500)
+    _debounce((amount: number) => {
+      setBuyAmountDebounced(amount)
+    }, 500)
   )
 
   const { data: swapQuotes, isLoading: swapQuotesIsLoading } = useSwapQuotes({
@@ -39,7 +41,7 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
   })
 
   useEffect(() => {
-    debouncedFnBuyAmount.current(buyAmount)   
+    debouncedFnBuyAmount.current(buyAmount)
   }, [buyAmount])
 
   const onClickSwap = async (swapQuote: SwapQuote) => {
