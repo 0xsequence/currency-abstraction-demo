@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+import _debounce from 'lodash/debounce'
 import { SwapQuote } from '@0xsequence/api'
 import { Box, Button, NumericInput, Spinner, Text } from '@0xsequence/design-system'
 import { ContractInfo } from '@0xsequence/indexer'
@@ -19,9 +21,14 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
   const { clearCachedBalances } = useClearCachedBalances()
 
   const [swapInProgress, setSwapInProgress] = useState(false)
+  const [buyAmountDebounced, setBuyAmountDebounced] = useState(1)
   const [buyAmount, setBuyAmount] = useState(1)
 
-  const fullAmountStr = (BigInt(buyAmount) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
+  const fullAmountStr = (BigInt(buyAmountDebounced) * BigInt(10) ** BigInt(currencyInfo.decimals || 1)).toString()
+
+  const debouncedFnBuyAmount = useRef(
+    _debounce((amount: number) => { setBuyAmountDebounced(amount) }, 500)
+  )
 
   const { data: swapQuotes, isLoading: swapQuotesIsLoading } = useSwapQuotes({
     userAddress: userAddress ?? '',
@@ -30,6 +37,10 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
     currencyAmount: fullAmountStr,
     withContractInfo: true
   })
+
+  useEffect(() => {
+    debouncedFnBuyAmount.current(buyAmount)   
+  }, [buyAmount])
 
   const onClickSwap = async (swapQuote: SwapQuote) => {
     if (!walletClient || !userAddress || !publicClient) {
