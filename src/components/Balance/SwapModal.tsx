@@ -150,15 +150,9 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
           value={buyAmount}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBuyAmount(parseFloat(e.target?.value || '0'))}
         />
-        <Text variant="small" color="text100">Hint: You will need {SWAP_CURRENCY.name} for swapping. Get some&nbsp;
-          <Text
-            variant="normal"
-            as="a"
-            color="text100"
-            href={SWAP_CURRENCY.url}
-            target="_blank"
-            rel="noreferrer"
-          >
+        <Text variant="small" color="text100">
+          Hint: You will need {SWAP_CURRENCY.name} for swapping. Get some&nbsp;
+          <Text variant="normal" as="a" color="text100" href={SWAP_CURRENCY.url} target="_blank" rel="noreferrer">
             here
           </Text>
         </Text>

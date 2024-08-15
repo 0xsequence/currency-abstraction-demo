@@ -8,7 +8,6 @@ export const SWAP_CURRENCY = {
   url: 'https://sepolia.etherscan.io/token/0xfff9976782d46cc05630d1f6ebab18b2324d6b14#writeContract'
 }
 
-
 interface SaleItem {
   tokenId: string
 }
