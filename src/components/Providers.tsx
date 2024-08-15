@@ -16,12 +16,10 @@ const queryClient = new QueryClient()
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const projectAccessKey = useProjectAccessKey()
-  const walletConnectProjectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || 'c65a6cb1aa83c4e24500130f23a437d8'
-  const googleClientId =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID || '970987756660-35a6tc48hvi8cev9cnknp0iugv9poa23.apps.googleusercontent.com'
-  const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID || 'com.horizon.sequence.waas'
-  const waasConfigKey =
-    import.meta.env.VITE_WAAS_CONFIG_KEY || 'eyJwcm9qZWN0SWQiOjEzNjM5LCJycGNTZXJ2ZXIiOiJodHRwczovL3dhYXMuc2VxdWVuY2UuYXBwIn0='
+  const walletConnectProjectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID
+  const waasConfigKey = import.meta.env.VITE_WAAS_CONFIG_KEY
   const appleRedirectURI = window.location.origin + window.location.pathname
 
   const connectors = getDefaultWaasConnectors({
