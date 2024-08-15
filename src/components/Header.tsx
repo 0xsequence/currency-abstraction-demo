@@ -4,7 +4,7 @@ export const Header = () => {
   return (
     <>
       <Text as="h2" variant="lg" color="text100" marginBottom="0">
-        NFT Checkout Demo
+        Currency Abstraction Demo
       </Text>
       <Image src="sequence-icon-cropped.png" style={{ maxWidth: 100 }} />
       <Box marginTop="5" marginBottom="4" style={{ maxWidth: 600 }}>
