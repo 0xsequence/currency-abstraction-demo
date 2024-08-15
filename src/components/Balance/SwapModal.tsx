@@ -6,8 +6,10 @@ import { ContractInfo } from '@0xsequence/indexer'
 import { utils as etherUtils } from 'ethers'
 import { useState } from 'react'
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
+
 import { useSwapQuotes } from '../../hooks/data'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
+import { SWAP_CURRENCY } from '../../constants'
 
 interface SwapModalProps {
   currencyInfo: ContractInfo
@@ -148,6 +150,18 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
           value={buyAmount}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBuyAmount(parseFloat(e.target?.value || '0'))}
         />
+        <Text variant="small" color="text100">Hint: You will need {SWAP_CURRENCY.name} for swapping. Get some&nbsp;
+          <Text
+            variant="normal"
+            as="a"
+            color="text100"
+            href={SWAP_CURRENCY.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            here
+          </Text>
+        </Text>
         <SwapQuotesList />
       </Box>
     </Box>
