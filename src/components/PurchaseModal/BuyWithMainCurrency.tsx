@@ -132,7 +132,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         }
       ]
 
-      const sequenceWaaS = connector?.["sequenceWaas"] as SequenceWaaS | undefined
+      const sequenceWaaS = connector?.['sequenceWaas'] as SequenceWaaS | undefined
 
       let txnHash = ''
       if (sequenceWaaS) {
