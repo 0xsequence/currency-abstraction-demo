@@ -22,6 +22,7 @@
     "@0xsequence/kit-connectors": "^2.9.2",
     "@0xsequence/metadata": "^1.10.12",
     "@0xsequence/network": "^1.10.12",
+    "@0xsequence/waas": "^1.10.13",
     "@tanstack/react-query": "^5.51.9",
     "@types/lodash": "^4.17.7",
     "@vanilla-extract/css": "^1.15.3",

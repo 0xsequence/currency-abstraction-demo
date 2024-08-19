@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Box, Button, Card, Spinner, Text, TokenImage, CheckmarkIcon, CloseIcon, useMediaQuery } from '@0xsequence/design-system'
-import { formatUnits, zeroAddress, Hex, toHex } from 'viem'
+import { Box, Button, Card, Spinner, Text, TokenImage, useMediaQuery } from '@0xsequence/design-system'
+import { SequenceWaaS } from '@0xsequence/waas'
+import { formatUnits, zeroAddress, Hex, toHex, encodeFunctionData } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
 import { useBalance } from '../../hooks/data'
@@ -26,11 +27,10 @@ interface TokenSaleDetailsData {
 export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
   const isMobile = useMediaQuery('isMobile')
   const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress, connector } = useAccount()
   const { clearCachedBalances } = useClearCachedBalances()
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
-  const [approvalInProgress, setApprovalInProgress] = useState(false)
   const [purchaseInProgress, setPurchaseInProgress] = useState(false)
 
   const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
@@ -66,6 +66,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
   const priceFormatted = formatUnits(BigInt(price), currencyData?.decimals || 0)
+  const isApproved: boolean = (allowanceData as bigint) >= BigInt(price)
 
   const balance: bigint = BigInt(currencyBalanceData?.[0]?.balance || '0')
   let balanceFormatted = Number(formatUnits(balance, currencyData?.decimals || 0))
@@ -73,44 +74,10 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
   const isNotEnoughFunds: boolean = price > balance
 
-  const isApproved: boolean = (allowanceData as bigint) >= BigInt(price)
-
   const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading
 
-  const onClickApprove = async () => {
-    if (!walletClient || !userAddress || !publicClient) {
-      return
-    }
-
-    setApprovalInProgress(true)
-
-    try {
-      const walletClientChainId = await walletClient.getChainId()
-      if (walletClientChainId !== args.chainId) {
-        await walletClient.switchChain({ id: args.chainId })
-      }
-
-      const txnHash = await walletClient?.writeContract({
-        account: userAddress,
-        abi: ERC_20_CONTRACT_ABI,
-        address: currencyData!.address as Hex,
-        functionName: 'approve',
-        args: [SALES_CONTRACT_ADDRESS, price]
-      })
-      await publicClient.waitForTransactionReceipt({
-        hash: txnHash as Hex,
-        confirmations: 1
-      })
-      await refechAllowance()
-    } catch (e) {
-      console.error('an error occurred...', e)
-    }
-
-    setApprovalInProgress(false)
-  }
-
   const onClickPurchase = async () => {
-    if (!walletClient || !userAddress || !publicClient) {
+    if (!walletClient || !userAddress || !publicClient || !userAddress || !currencyData || !connector) {
       return
     }
 
@@ -121,6 +88,12 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       if (walletClientChainId !== args.chainId) {
         await walletClient.switchChain({ id: args.chainId })
       }
+
+      const approveTxData = encodeFunctionData({
+        abi: ERC_20_CONTRACT_ABI,
+        functionName: 'approve',
+        args: [SALES_CONTRACT_ADDRESS, price]
+      })
 
       /*   **
        * Mint tokens.
@@ -136,18 +109,59 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
        * @dev An empty proof is supplied when no proof is required.
        */
 
-      const txnHash = await walletClient?.writeContract({
-        account: userAddress,
+      const purchaseTransactionData = encodeFunctionData({
         abi: SALES_CONTRACT_ABI,
-        address: SALES_CONTRACT_ADDRESS,
         functionName: 'mint',
         args: [userAddress, [BigInt(args.tokenId)], [BigInt(1)], toHex(0), currencyData?.address, price, [toHex(0, { size: 32 })]]
       })
 
+      const transactions = [
+        ...(isApproved
+          ? []
+          : [
+              {
+                to: currencyData.address || '',
+                data: approveTxData as string,
+                chainId: CHAIN_ID
+              }
+            ]),
+        {
+          to: SALES_CONTRACT_ADDRESS,
+          data: purchaseTransactionData as string,
+          chainId: CHAIN_ID
+        }
+      ]
+
+      const sequenceWaaS = connector?.["sequenceWaas"] as SequenceWaaS | undefined
+
+      let txnHash = ''
+      if (sequenceWaaS) {
+        // waas connector logic
+        const response = await sequenceWaaS.sendTransaction({
+          transactions
+        })
+
+        if (response.code === 'transactionFailed') {
+          throw new Error(response.data.error)
+        }
+
+        txnHash = response.data.txHash
+      } else {
+        // We fire the transactions one at a time since the cannot be batched
+        for (const transaction of transactions) {
+          txnHash = await walletClient.sendTransaction({
+            account: userAddress,
+            to: transaction.to as Hex,
+            data: transaction.data as Hex
+          })
+        }
+      }
+
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
-        confirmations: 1
+        confirmations: 2
       })
+
       args.closeModal()
       refechAllowance()
       clearCachedBalances()
@@ -157,12 +171,6 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
 
     setPurchaseInProgress(false)
   }
-
-  const SuccessIcon = () => <CheckmarkIcon color="positive" />
-
-  const ErrorIcon = () => <CloseIcon color="negative" />
-
-  const LoadingIcon = () => <Spinner size="sm" />
 
   if (isLoading) {
     return (
@@ -180,14 +188,32 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     )
   }
 
-  const ApprovalStatusIcon = () => {
-    if (approvalInProgress) {
-      return <LoadingIcon />
-    } else if (isApproved || purchaseInProgress) {
-      return <SuccessIcon />
-    } else {
-      return <ErrorIcon />
+  const StatusMessage = () => {
+    if (isNotEnoughFunds) {
+      return (
+        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
+          <Text variant="small" color="negative">
+            Not enough funds
+          </Text>
+          <Box style={{ height: '22px', width: '22px' }} />
+        </Box>
+      )
     }
+
+    if (purchaseInProgress) {
+      return (
+        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
+          <Text variant="small" color="text100">
+            In progress...
+          </Text>
+          <Box justifyContent="center" alignItems="center" style={{ height: '22px', width: '22px' }}>
+            <Spinner size="sm" />
+          </Box>
+        </Box>
+      )
+    }
+
+    return null
   }
 
   return (
@@ -222,36 +248,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
           </Text>
           <TokenImage size="xs" src={currencyData?.logoURI} />
         </Box>
-        {isNotEnoughFunds && (
-          <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
-            <Text variant="small" color="negative">
-              Not enough funds
-            </Text>
-          </Box>
-        )}
-      </Box>
-      <Box
-        flexDirection="column"
-        gap="2"
-        style={{ ...(isMobile ? { width: '200px' } : {}) }}
-        alignItems={isMobile ? 'center' : 'flex-start'}
-      >
-        <Box flexDirection="row" alignItems="center" gap="1">
-          <Text variant="normal" color="text100">
-            Step 1: Approve Currency
-          </Text>
-          <Box justifyContent="center" alignItems="center" style={{ width: '24px', height: '24px' }}>
-            <ApprovalStatusIcon />
-          </Box>
-        </Box>
-        <Button
-          label="Approve"
-          onClick={onClickApprove}
-          disabled={isApproved || isNotEnoughFunds}
-          variant="primary"
-          shape="square"
-          pending={approvalInProgress}
-        />
+        <StatusMessage />
       </Box>
       <Box
         flexDirection="column"
@@ -259,18 +256,10 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         alignItems={isMobile ? 'center' : 'flex-start'}
         style={{ ...(isMobile ? { width: '200px' } : {}) }}
       >
-        <Box flexDirection="row" justifyContent="center" alignItems="center" gap="1">
-          <Text variant="normal" color="text100">
-            Step 2: Purchase
-          </Text>
-          <Box justifyContent="center" alignItems="center" style={{ height: '24px' }}>
-            {purchaseInProgress && <Spinner size="sm" />}
-          </Box>
-        </Box>
         <Button
           label="Purchase"
           onClick={onClickPurchase}
-          disabled={!isApproved || approvalInProgress || isNotEnoughFunds}
+          disabled={purchaseInProgress || isNotEnoughFunds}
           variant="primary"
           shape="square"
           pending={purchaseInProgress}
