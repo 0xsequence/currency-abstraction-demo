@@ -8,7 +8,7 @@ import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
 import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
-import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abi'
+import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abis/sales'
 
 interface BuyWithMainCurrencyProps {
   tokenId: string
