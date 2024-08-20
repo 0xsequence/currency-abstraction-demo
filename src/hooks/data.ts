@@ -6,6 +6,7 @@ import { ContractInfo, SequenceMetadata } from '@0xsequence/metadata'
 import { useAPIClient } from '../hooks/useAPIClient'
 import { useIndexerClient } from '../hooks/useIndexerClient'
 import { useMetadataClient } from '../hooks/useMetadataClient'
+import { useBalance as wagmiUseBalance } from 'wagmi'
 
 export const time = {
   oneSecond: 1 * 1000,
@@ -96,6 +97,23 @@ export const useBalance = (args: UseBalanceArgs) => {
     retry: true,
     staleTime: time.oneSecond * 30,
     enabled: !!args.chainId && !!args.accountAddress && !!args.contractAddress
+  })
+}
+
+interface UseNativeBalanceArgs {
+  chainId: number
+  accountAddress: string
+}
+
+export const useNativeBalance = (args: UseNativeBalanceArgs) => {
+  return wagmiUseBalance({
+    address: args.accountAddress as `0x${string}`,
+    chainId: args.chainId,
+    query: {
+      retry: true,
+      staleTime: time.oneSecond * 30,
+      enabled: !!args.chainId && !!args.accountAddress
+    }
   })
 }
 

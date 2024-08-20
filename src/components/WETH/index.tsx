@@ -1,17 +1,17 @@
 import { Box, Text, Spinner, useMediaQuery } from '@0xsequence/design-system'
-import { useAccount, useBalance as wagmiUseBalance } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 import { CHAIN_ID, WETH_CONTRACT_ADDRESS } from '../../constants'
 import { utils as etherUtils } from 'ethers'
 import { WrapButton } from './WrapButton'
-import { useBalance } from '../../hooks/data'
+import { useBalance, useNativeBalance } from '../../hooks/data'
 
 export const WETHBalance = () => {
   const isMobile = useMediaQuery('isMobile')
   const { address: userAddress } = useAccount()
 
-  const { data: ethBalanceData, isLoading: ethBalanceIsLoading } = wagmiUseBalance({
-    address: userAddress,
+  const { data: ethBalanceData, isLoading: ethBalanceIsLoading } = useNativeBalance({
+    accountAddress: userAddress ?? '',
     chainId: CHAIN_ID
   })
 

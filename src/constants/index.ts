@@ -4,7 +4,7 @@ export const SALES_CONTRACT_ADDRESS = '0xfdd0d596350a78c3852a43d3b5910154b7c644d
 export const WETH_CONTRACT_ADDRESS = '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14'
 export const CHAIN_ID = 11155111
 export const ETHERSCAN_URL = 'https://sepolia.etherscan.io'
-export const FAUCET_URL = "https://www.alchemy.com/faucets/ethereum-sepolia"
+export const FAUCET_URL = 'https://www.alchemy.com/faucets/ethereum-sepolia'
 export const SWAP_CURRENCY = {
   name: 'Wrapped Eth',
   address: WETH_CONTRACT_ADDRESS,

@@ -41,10 +41,10 @@ export const WrapModal = ({ ethBalance, closeModal }: WrapModalProps) => {
       // Deposit ETH
       const value = etherUtils.parseEther(buyAmount.toString()).toBigInt()
       const wrapTxHash = await writeContractAsync({
-          abi: WETH_CONTRACT_ABI,
-          address: WETH_CONTRACT_ADDRESS,
-          functionName: 'deposit',
-          value,
+        abi: WETH_CONTRACT_ABI,
+        address: WETH_CONTRACT_ADDRESS,
+        functionName: 'deposit',
+        value
       })
       await publicClient.waitForTransactionReceipt({
         hash: wrapTxHash,
@@ -73,13 +73,7 @@ export const WrapModal = ({ ethBalance, closeModal }: WrapModalProps) => {
             here
           </Text>
         </Text>
-        <Box
-          flexDirection="row"
-          width={'full'}
-          justifyContent={'space-between'}
-          alignItems="center"
-          gap="1"
-        >
+        <Box flexDirection="row" width={'full'} justifyContent={'space-between'} alignItems="center" gap="1">
           <Button label="Wrap" onClick={() => onClickWrap()} variant="primary" disabled={wrapInProgress} />
         </Box>
       </Box>
