@@ -3,7 +3,7 @@ import { formatUnits } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
-import { SALES_CONTRACT_ABI } from '../../constants/abi'
+import { SALES_CONTRACT_ABI } from '../../constants/abis/sales'
 
 interface CollectibleCardContentProps {
   tokenId: string

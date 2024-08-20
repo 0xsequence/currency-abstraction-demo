@@ -7,6 +7,7 @@ import { NFT_TOKEN_ADDRESS, SALES_CONTRACT_ADDRESS, CHAIN_ID, ETHERSCAN_URL } fr
 import { useContractInfo } from '../hooks/data'
 import { useSalesCurrency } from '../hooks/useSalesCurrency'
 import { Balance } from './Balance'
+import { WETHBalance } from './WETH'
 
 export const Connected = () => {
   const { address: userAddress } = useAccount()
@@ -49,6 +50,7 @@ export const Connected = () => {
       gap="3"
       style={{ width: '100%', maxWidth: 700 }}
     >
+      <WETHBalance />
       <Balance />
 
       <Collapsible label="Collection Info">

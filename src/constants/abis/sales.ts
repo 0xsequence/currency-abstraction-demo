@@ -572,4 +572,4 @@ export const ERC_20_CONTRACT_ABI = [
   },
   { type: 'error', name: 'InvalidInitialization', inputs: [] },
   { type: 'error', name: 'InvalidInitialization', inputs: [] }
-]
+] as const

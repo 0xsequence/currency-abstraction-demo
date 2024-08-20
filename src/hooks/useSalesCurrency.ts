@@ -3,7 +3,7 @@ import { useReadContract } from 'wagmi'
 
 import { useContractInfo } from '../hooks/data'
 import { CHAIN_ID, SALES_CONTRACT_ADDRESS } from '../constants'
-import { SALES_CONTRACT_ABI } from '../constants/abi'
+import { SALES_CONTRACT_ABI } from '../constants/abis/sales'
 
 interface UseSalesCurrencyReturn {
   data: ContractInfo | undefined
