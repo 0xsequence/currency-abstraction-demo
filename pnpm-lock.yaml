@@ -15,8 +15,8 @@ importers:
         specifier: ^1.10.12
         version: 1.10.12
       '@0xsequence/design-system':
-        specifier: ^1.7.2
-        version: 1.7.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.7.5
+        version: 1.7.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@0xsequence/indexer':
         specifier: ^1.10.12
         version: 1.10.12
@@ -25,7 +25,7 @@ importers:
         version: 2.9.2(cdc6scfodk5hqywn4x5eleil7e)
       '@0xsequence/kit-checkout':
         specifier: ^2.9.2
-        version: 2.9.2(6gqqcsjzp4y2fw5kdwmkwiicte)
+        version: 2.9.2(wn5povbnacxor6wkmeyayf6n44)
       '@0xsequence/kit-connectors':
         specifier: ^2.9.2
         version: 2.9.2(0xsequence@1.10.12(bufferutil@4.0.8)(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(utf-8-validate@5.0.10))(@0xsequence/kit@2.9.2(cdc6scfodk5hqywn4x5eleil7e))(bufferutil@4.0.8)(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@5.0.10)(uuid@9.0.1)(viem@2.17.5(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10))(wagmi@2.11.2(@tanstack/query-core@5.51.9)(@tanstack/react-query@5.51.9(react@18.3.1))(@types/react@18.3.3)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.8(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.18.0)(typescript@5.5.3)(utf-8-validate@5.0.10)(viem@2.17.5(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)))
@@ -165,8 +165,8 @@ packages:
     peerDependencies:
       ethers: '>=5.5'
 
-  '@0xsequence/design-system@1.7.2':
-    resolution: {integrity: sha512-xWaIfnPYbNJd/Rccf/Ad4lzIgorJ6hF9SNuIfbceTpNu8otTurUsn7NX0Cuf+MSI6tKGfDpJMqJDiM9HCyvTlw==}
+  '@0xsequence/design-system@1.7.5':
+    resolution: {integrity: sha512-1WFo331SlXGg9QplnE8knSfs3gdYNI9iee/Wj9Menx5XVxvgnKL6icl2LyAkVdQ29sTWBcj6gEpjDTdc/JLtcw==}
     peerDependencies:
       framer-motion: '>=6'
       react: '>=17'
@@ -5935,7 +5935,7 @@ snapshots:
       '@0xsequence/abi': 1.9.37
       ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
-  '@0xsequence/design-system@1.7.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@0xsequence/design-system@1.7.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-aspect-ratio': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-checkbox': 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5957,7 +5957,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@0xsequence/design-system@1.7.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@8.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@0xsequence/design-system@1.7.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@8.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-aspect-ratio': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-checkbox': 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6001,11 +6001,11 @@ snapshots:
 
   '@0xsequence/indexer@1.9.37': {}
 
-  '@0xsequence/kit-checkout@2.9.2(6gqqcsjzp4y2fw5kdwmkwiicte)':
+  '@0xsequence/kit-checkout@2.9.2(wn5povbnacxor6wkmeyayf6n44)':
     dependencies:
       0xsequence: 1.10.12(bufferutil@4.0.8)(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(utf-8-validate@5.0.10)
       '@0xsequence/api': 1.10.12
-      '@0xsequence/design-system': 1.7.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@0xsequence/design-system': 1.7.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@11.2.13(@emotion/is-prop-valid@0.8.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@0xsequence/indexer': 1.10.12
       '@0xsequence/kit': 2.9.2(cdc6scfodk5hqywn4x5eleil7e)
       '@0xsequence/metadata': 1.10.12
@@ -6052,7 +6052,7 @@ snapshots:
       '@0xsequence/api': 1.10.12
       '@0xsequence/auth': 1.9.37(bufferutil@4.0.8)(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(utf-8-validate@5.0.10)
       '@0xsequence/core': 1.9.37(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
-      '@0xsequence/design-system': 1.7.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@8.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@0xsequence/design-system': 1.7.5(@types/react-dom@18.3.0)(@types/react@18.3.3)(framer-motion@8.5.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@0xsequence/ethauth': 0.8.1(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))
       '@0xsequence/indexer': 1.10.12
       '@0xsequence/metadata': 1.10.12

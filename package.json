@@ -15,7 +15,7 @@
   "dependencies": {
     "0xsequence": "^1.10.12",
     "@0xsequence/api": "^1.10.12",
-    "@0xsequence/design-system": "^1.7.2",
+    "@0xsequence/design-system": "^1.7.5",
     "@0xsequence/indexer": "^1.10.12",
     "@0xsequence/kit": "^2.9.2",
     "@0xsequence/kit-checkout": "^2.9.2",
