@@ -108,7 +108,7 @@ interface UseSwapQuotesArgs {
   withContractInfo?: boolean
 }
 
-type SwapQuotesWithCurrencyInfo = {
+export type SwapQuotesWithCurrencyInfo = {
   quote: SwapQuote
   info: ContractInfo | undefined
   balance: TokenBalance | undefined

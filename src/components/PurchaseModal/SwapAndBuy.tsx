@@ -4,7 +4,7 @@ import { SequenceWaaS } from '@0xsequence/waas'
 import { formatUnits, zeroAddress, Hex, toHex, encodeFunctionData } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
-import { useBalance, useSwapQuotes } from '../../hooks/data'
+import { useBalance, useSwapQuotes, SwapQuotesWithCurrencyInfo } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 import { useClearCachedQuotes } from '../../hooks/useClearCachedQuotes'
@@ -34,6 +34,8 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
   const [purchaseInProgress, setPurchaseInProgress] = useState(false)
+
+  // const clearCachedQuotesCallback = useCallback(clearCachedQuotes, [clearCachedQuotes])
 
   const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
@@ -79,7 +81,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
 
   useEffect(() => {
     clearCachedQuotes()
-  }, [clearCachedQuotes])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const balance: bigint = BigInt(currencyBalanceData?.[0]?.balance || '0')
 
@@ -88,7 +90,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
   const isLoading: boolean =
     currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading || swapQuotesIsLoading
 
-  const onClickPurchase = async () => {
+  const onClickPurchase = async (swapQuote: SwapQuotesWithCurrencyInfo) => {
     if (!walletClient || !userAddress || !publicClient || !userAddress || !currencyData || !connector) {
       return
     }
@@ -128,6 +130,23 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
       })
 
       const transactions = [
+        // Swap quote optional approve step
+        ...(swapQuote.quote.approveData
+          ? [
+              {
+                to: swapQuote.quote.currencyAddress,
+                data: swapQuote.quote.approveData,
+                chain: CHAIN_ID
+              }
+            ]
+          : []),
+        // Swap quote tx
+        {
+          to: swapQuote.quote.to,
+          data: swapQuote.quote.transactionData,
+          chain: CHAIN_ID
+        },
+        // Actual transaction optional approve step
         ...(isApproved
           ? []
           : [
@@ -137,6 +156,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
                 chainId: CHAIN_ID
               }
             ]),
+        // transaction on the sales contract
         {
           to: SALES_CONTRACT_ADDRESS,
           data: purchaseTransactionData as string,
@@ -167,8 +187,16 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
             data: transaction.data as Hex
           })
         }
+
+        // wait for a block confirmation otherwise metamask throws an error
+        await publicClient.waitForTransactionReceipt({
+          hash: txnHash as Hex,
+          confirmations: 1
+        })
       }
 
+      // wait for at least two block confirmations
+      // for changes to be reflected by the indexer
       await publicClient.waitForTransactionReceipt({
         hash: txnHash as Hex,
         confirmations: 2
@@ -177,6 +205,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
       args.closeModal()
       refechAllowance()
       clearCachedBalances()
+      clearCachedQuotes()
     } catch (e) {
       console.error('Failed to purchase...', e)
     }
@@ -228,12 +257,13 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
     return null
   }
 
-  return swapQuotes?.map(swapQuote => {
+  return swapQuotes?.map((swapQuote, index) => {
     const swapQuotePriceFormatted = formatUnits(BigInt(swapQuote.quote.price), swapQuote.info?.decimals || 18)
     const balanceFormatted = formatUnits(BigInt(swapQuote.balance?.balance || 0), swapQuote.info?.decimals || 18)
 
     return (
       <Card
+        key={swapQuote.info?.address || index}
         width="full"
         flexDirection={isMobile ? 'column' : 'row'}
         alignItems="center"
@@ -274,7 +304,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
         >
           <Button
             label="Purchase"
-            onClick={onClickPurchase}
+            onClick={() => onClickPurchase(swapQuote)}
             disabled={purchaseInProgress || isNotEnoughFunds}
             variant="primary"
             shape="square"
