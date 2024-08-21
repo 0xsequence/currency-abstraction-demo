@@ -61,19 +61,25 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
       }
 
       // Approve
-      const approveTxHash = await walletClient.sendTransaction({
-        to: swapQuote.currencyAddress as `0x${string}`,
-        data: swapQuote.approveData as `0x${string}`
-      })
-      await publicClient.waitForTransactionReceipt({
-        hash: approveTxHash,
-        confirmations: 1
-      })
+      if (swapQuote.approveData) {
+        const approveTxHash = await walletClient.sendTransaction({
+          to: swapQuote.currencyAddress as `0x${string}`,
+          data: swapQuote.approveData as `0x${string}`
+        })
+        await publicClient.waitForTransactionReceipt({
+          hash: approveTxHash,
+          confirmations: 1
+        })
+      }
 
       // Swap
+      // Hack until api changes upstream are merged
+      type SwapQuoteWithTransactionValue = SwapQuote & { transactionValue?: string }
+      const swapWithValue = swapQuote as SwapQuoteWithTransactionValue
       const swapTxHash = await walletClient.sendTransaction({
         to: swapQuote.to as `0x${string}`,
-        data: swapQuote.transactionData as `0x${string}`
+        data: swapQuote.transactionData as `0x${string}`,
+        value: BigInt(swapWithValue.transactionValue || 0)
       })
       await publicClient.waitForTransactionReceipt({
         hash: swapTxHash,

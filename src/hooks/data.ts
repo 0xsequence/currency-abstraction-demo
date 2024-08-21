@@ -6,6 +6,7 @@ import { ContractInfo, SequenceMetadata } from '@0xsequence/metadata'
 import { useAPIClient } from '../hooks/useAPIClient'
 import { useIndexerClient } from '../hooks/useIndexerClient'
 import { useMetadataClient } from '../hooks/useMetadataClient'
+import { FAUX_NATIVE_TOKEN_ADDRESS, NATIVE_TOKEN_DETAILS } from '../constants'
 
 export const time = {
   oneSecond: 1 * 1000,
@@ -107,9 +108,14 @@ interface UseSwapQuotesArgs {
   withContractInfo?: boolean
 }
 
+type MinimalContractInfo = {
+  name: string
+  symbol: string
+}
+
 type SwapQuotesWithCurrencyInfo = {
   quote: SwapQuote
-  info: ContractInfo | undefined
+  info: MinimalContractInfo | undefined
 }
 
 const getSwapQuotes = async (
@@ -140,10 +146,17 @@ const getSwapQuotes = async (
     })
   }
 
+  const getCurrencyInfoFromMap = async (currencyAddress: string): Promise<MinimalContractInfo | undefined> => {
+    if (currencyAddress.toLowerCase() === FAUX_NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+      return NATIVE_TOKEN_DETAILS
+    }
+    return await currencyInfoMap.get(currencyAddress)
+  }
+
   return Promise.all(
     res?.swapQuotes.map(async quote => ({
       quote,
-      info: (await currencyInfoMap.get(quote.currencyAddress)) || undefined
+      info: (await getCurrencyInfoFromMap(quote.currencyAddress)) || undefined
     })) || []
   )
 }
