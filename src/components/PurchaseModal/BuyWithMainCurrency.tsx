@@ -154,13 +154,12 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
             to: transaction.to as Hex,
             data: transaction.data as Hex
           })
+          // wait for a block confirmation otherwise metamask throws an error
+          await publicClient.waitForTransactionReceipt({
+            hash: txnHash as Hex,
+            confirmations: 1
+          })
         }
-
-        // wait for a block confirmation otherwise metamask throws an error
-        await publicClient.waitForTransactionReceipt({
-          hash: txnHash as Hex,
-          confirmations: 1
-        })
       }
 
       // wait for at least two block confirmations
