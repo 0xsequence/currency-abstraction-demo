@@ -8,7 +8,7 @@ import { useBalance } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 
-import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
+import { SALES_CONTRACT_ADDRESS, CHAIN_ID, TRANSACTION_CONFIRMATIONS } from '../../constants'
 import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abi'
 
 interface BuyWithMainCurrencyProps {
@@ -137,8 +137,18 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       let txnHash = ''
       if (sequenceWaaS) {
         // waas connector logic
+        const resp = await sequenceWaaS.feeOptions({
+          transactions: transactions,
+          network: CHAIN_ID
+        })
+
+        const transactionsFeeOption = resp.data.feeOptions[0]
+        const transactionsFeeQuote = resp.data.feeQuote
+
         const response = await sequenceWaaS.sendTransaction({
-          transactions
+          transactions,
+          transactionsFeeOption,
+          transactionsFeeQuote
         })
 
         if (response.code === 'transactionFailed') {
@@ -146,6 +156,13 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
         }
 
         txnHash = response.data.txHash
+
+        // wait for at least two block confirmations
+        // for changes to be reflected by the indexer
+        await publicClient.waitForTransactionReceipt({
+          hash: txnHash as Hex,
+          confirmations: TRANSACTION_CONFIRMATIONS
+        })
       } else {
         // We fire the transactions one at a time since the cannot be batched
         for (const transaction of transactions) {
@@ -157,17 +174,10 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
           // wait for a block confirmation otherwise metamask throws an error
           await publicClient.waitForTransactionReceipt({
             hash: txnHash as Hex,
-            confirmations: 1
+            confirmations: TRANSACTION_CONFIRMATIONS
           })
         }
       }
-
-      // wait for at least two block confirmations
-      // for changes to be reflected by the indexer
-      await publicClient.waitForTransactionReceipt({
-        hash: txnHash as Hex,
-        confirmations: 2
-      })
 
       args.closeModal()
       refechAllowance()

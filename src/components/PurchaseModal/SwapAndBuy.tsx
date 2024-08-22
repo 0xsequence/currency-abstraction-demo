@@ -4,12 +4,13 @@ import { SequenceWaaS } from '@0xsequence/waas'
 import { formatUnits, zeroAddress, Hex, toHex, encodeFunctionData } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
-import { useBalance, useSwapQuotes, SwapQuotesWithCurrencyInfo } from '../../hooks/data'
+import { useSwapQuotes, SwapQuotesWithCurrencyInfo } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
 import { useClearCachedQuotes } from '../../hooks/useClearCachedQuotes'
+import { compareAddress } from '../../utils'
 
-import { SALES_CONTRACT_ADDRESS, CHAIN_ID } from '../../constants'
+import { SALES_CONTRACT_ADDRESS, CHAIN_ID, TRANSACTION_CONFIRMATIONS } from '../../constants'
 import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abi'
 
 interface BuyWithMainCurrencyProps {
@@ -33,9 +34,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
   const { clearCachedQuotes } = useClearCachedQuotes()
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
-  const [purchaseInProgress, setPurchaseInProgress] = useState(false)
-
-  // const clearCachedQuotesCallback = useCallback(clearCachedQuotes, [clearCachedQuotes])
+  const [swapsInProgress, setSwapsInProgress] = useState<string[]>([])
 
   const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
@@ -60,14 +59,6 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
     }
   })
 
-  const { data: currencyBalanceData, isLoading: currencyBalanceIsLoading } = useBalance({
-    chainId: args.chainId,
-    contractAddress: currencyData?.address || '',
-    accountAddress: userAddress || '',
-    // includeMetadata must be false to work around a bug
-    includeMetadata: false
-  })
-
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
   const isApproved: boolean = (allowanceData as bigint) >= BigInt(price)
 
@@ -81,21 +72,19 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
 
   useEffect(() => {
     clearCachedQuotes()
+    setSwapsInProgress([])
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const balance: bigint = BigInt(currencyBalanceData?.[0]?.balance || '0')
-
-  const isNotEnoughFunds: boolean = price > balance
-
-  const isLoading: boolean =
-    currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading || swapQuotesIsLoading
+  const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || swapQuotesIsLoading
 
   const onClickPurchase = async (swapQuote: SwapQuotesWithCurrencyInfo) => {
     if (!walletClient || !userAddress || !publicClient || !userAddress || !currencyData || !connector) {
       return
     }
 
-    setPurchaseInProgress(true)
+    const swapQuoteAddress = swapQuote.info?.address || ''
+
+    setSwapsInProgress([...swapsInProgress.filter(address => compareAddress(address, swapQuoteAddress)), swapQuoteAddress])
 
     try {
       const walletClientChainId = await walletClient.getChainId()
@@ -169,8 +158,18 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
       let txnHash = ''
       if (sequenceWaaS) {
         // waas connector logic
+        const resp = await sequenceWaaS.feeOptions({
+          transactions: transactions,
+          network: CHAIN_ID
+        })
+
+        const transactionsFeeOption = resp.data.feeOptions[0]
+        const transactionsFeeQuote = resp.data.feeQuote
+
         const response = await sequenceWaaS.sendTransaction({
-          transactions
+          transactions,
+          transactionsFeeOption,
+          transactionsFeeQuote
         })
 
         if (response.code === 'transactionFailed') {
@@ -178,6 +177,13 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
         }
 
         txnHash = response.data.txHash
+
+        // wait for at least two block confirmations
+        // for changes to be reflected by the indexer
+        await publicClient.waitForTransactionReceipt({
+          hash: txnHash as Hex,
+          confirmations: TRANSACTION_CONFIRMATIONS
+        })
       } else {
         // We fire the transactions one at a time since the cannot be batched
         for (const transaction of transactions) {
@@ -189,17 +195,10 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
           // wait for a block confirmation otherwise metamask throws an error
           await publicClient.waitForTransactionReceipt({
             hash: txnHash as Hex,
-            confirmations: 1
+            confirmations: TRANSACTION_CONFIRMATIONS
           })
         }
       }
-
-      // wait for at least two block confirmations
-      // for changes to be reflected by the indexer
-      await publicClient.waitForTransactionReceipt({
-        hash: txnHash as Hex,
-        confirmations: 2
-      })
 
       args.closeModal()
       refechAllowance()
@@ -209,7 +208,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
       console.error('Failed to purchase...', e)
     }
 
-    setPurchaseInProgress(false)
+    setSwapsInProgress([...swapsInProgress.filter(address => compareAddress(address, swapQuoteAddress))])
   }
 
   if (isLoading) {
@@ -228,18 +227,11 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
     )
   }
 
-  const StatusMessage = () => {
-    if (isNotEnoughFunds) {
-      return (
-        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
-          <Text variant="small" color="negative">
-            Not enough funds
-          </Text>
-          <Box style={{ height: '22px', width: '22px' }} />
-        </Box>
-      )
-    }
+  interface StatusMessageProps {
+    purchaseInProgress: boolean
+  }
 
+  const StatusMessage = ({ purchaseInProgress }: StatusMessageProps) => {
     if (purchaseInProgress) {
       return (
         <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
@@ -259,6 +251,8 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
   return swapQuotes?.map((swapQuote, index) => {
     const swapQuotePriceFormatted = formatUnits(BigInt(swapQuote.quote.price), swapQuote.info?.decimals || 18)
     const balanceFormatted = formatUnits(BigInt(swapQuote.balance?.balance || 0), swapQuote.info?.decimals || 18)
+    const swapQuoteAddress = swapQuote.info?.address || ''
+    const purchaseInProgress = swapsInProgress.includes(swapQuoteAddress)
 
     return (
       <Card
@@ -293,7 +287,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
             </Text>
             <TokenImage size="xs" src={swapQuote.info?.logoURI} />
           </Box>
-          <StatusMessage />
+          <StatusMessage purchaseInProgress={purchaseInProgress} />
         </Box>
         <Box
           flexDirection="column"
@@ -304,7 +298,7 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
           <Button
             label="Purchase"
             onClick={() => onClickPurchase(swapQuote)}
-            disabled={purchaseInProgress || isNotEnoughFunds}
+            disabled={purchaseInProgress}
             variant="primary"
             shape="square"
             pending={purchaseInProgress}

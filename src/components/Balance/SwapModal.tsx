@@ -9,7 +9,7 @@ import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 
 import { useSwapQuotes } from '../../hooks/data'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
-import { SWAP_CURRENCY } from '../../constants'
+import { SWAP_CURRENCY, TRANSACTION_CONFIRMATIONS } from '../../constants'
 
 interface SwapModalProps {
   currencyInfo: ContractInfo
@@ -67,7 +67,7 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
       })
       await publicClient.waitForTransactionReceipt({
         hash: approveTxHash,
-        confirmations: 1
+        confirmations: TRANSACTION_CONFIRMATIONS
       })
 
       // Swap
@@ -77,7 +77,7 @@ export const SwapModal = ({ currencyInfo, closeModal }: SwapModalProps) => {
       })
       await publicClient.waitForTransactionReceipt({
         hash: swapTxHash,
-        confirmations: 1
+        confirmations: TRANSACTION_CONFIRMATIONS
       })
     } catch (e) {
       console.error('Failed to swap...', e)

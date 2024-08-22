@@ -1,11 +1,10 @@
 import { Box, Text, Spinner, useMediaQuery } from '@0xsequence/design-system'
 import { useAccount } from 'wagmi'
+import { formatUnits } from 'viem'
 
 import { useBalance } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { CHAIN_ID } from '../../constants'
-import { utils as etherUtils } from 'ethers'
-import { SwapButton } from './SwapButton'
 
 export const Balance = () => {
   const isMobile = useMediaQuery('isMobile')
@@ -35,6 +34,7 @@ export const Balance = () => {
   }
 
   const currencyBalance = BigInt(currencyBalanceData?.[0]?.balance || 0)
+  const currencyDecimals = currencyData?.decimals || 18
 
   return (
     <Box margin="2" flexDirection="column" justifyContent="center" alignItems="center" gap="2">
@@ -43,10 +43,10 @@ export const Balance = () => {
           {currencyData?.name} Balance: &nbsp;
         </Text>
         <Text variant="normal" color="text100">
-          {etherUtils.formatEther(currencyBalance)} {currencyData?.symbol}
+          {formatUnits(currencyBalance, currencyDecimals)} {currencyData?.symbol}
         </Text>
       </Box>
-      {currencyData && <SwapButton currencyInfo={currencyData} />}
+      {/* {currencyData && <SwapButton currencyInfo={currencyData} />} */}
     </Box>
   )
 }
