@@ -98,20 +98,6 @@ export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
         args: [SALES_CONTRACT_ADDRESS, price]
       })
 
-      /*   **
-       * Mint tokens.
-       * @param to Address to mint tokens to.
-       * @param tokenIds Token IDs to mint.
-       * @param amounts Amounts of tokens to mint.
-       * @param data Data to pass if receiver is contract.
-       * @param expectedPaymentToken ERC20 token address to accept payment in. address(0) indicates ETH.
-       * @param maxTotal Maximum amount of payment tokens.
-       * @param proof Merkle proof for allowlist minting.
-       * @notice Sale must be active for all tokens.
-       * @dev tokenIds must be sorted ascending without duplicates.
-       * @dev An empty proof is supplied when no proof is required.
-       */
-
       const purchaseTransactionData = encodeFunctionData({
         abi: SALES_CONTRACT_ABI,
         functionName: 'mint',
