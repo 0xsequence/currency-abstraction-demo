@@ -46,7 +46,6 @@ export const Balance = () => {
           {formatUnits(currencyBalance, currencyDecimals)} {currencyData?.symbol}
         </Text>
       </Box>
-      {/* {currencyData && <SwapButton currencyInfo={currencyData} />} */}
     </Box>
   )
 }
