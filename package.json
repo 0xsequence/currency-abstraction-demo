@@ -15,13 +15,14 @@
   "dependencies": {
     "0xsequence": "^1.10.12",
     "@0xsequence/api": "^1.10.12",
-    "@0xsequence/design-system": "^1.7.2",
+    "@0xsequence/design-system": "^1.7.5",
     "@0xsequence/indexer": "^1.10.12",
     "@0xsequence/kit": "^2.9.2",
     "@0xsequence/kit-checkout": "^2.9.2",
     "@0xsequence/kit-connectors": "^2.9.2",
     "@0xsequence/metadata": "^1.10.12",
     "@0xsequence/network": "^1.10.12",
+    "@0xsequence/waas": "^1.10.13",
     "@tanstack/react-query": "^5.51.9",
     "@types/lodash": "^4.17.7",
     "@vanilla-extract/css": "^1.15.3",
@@ -30,8 +31,8 @@
     "lodash": "^4.17.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "viem": "^2.17.5",
-    "wagmi": "^2.11.2"
+    "viem": "^2.20.0",
+    "wagmi": "^2.12.7"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

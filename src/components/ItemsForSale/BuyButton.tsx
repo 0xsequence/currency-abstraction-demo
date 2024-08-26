@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Modal, useMediaQuery } from '@0xsequence/design-system'
+import { Button, Modal } from '@0xsequence/design-system'
 
 import { PurchaseModal } from '../PurchaseModal'
 
@@ -11,7 +11,6 @@ interface BuyMainCurrencyButtonProps {
 
 export const BuyMainCurrencyButton = ({ tokenId, collectionAddress, chainId }: BuyMainCurrencyButtonProps) => {
   const [purchaseModalIsOpen, setPurchaseModalIsOpen] = useState(false)
-  const isMobile = useMediaQuery('isMobile')
 
   const onClickBuy = () => {
     setPurchaseModalIsOpen(true)
@@ -22,9 +21,6 @@ export const BuyMainCurrencyButton = ({ tokenId, collectionAddress, chainId }: B
       <Button size="sm" variant="primary" label="Purchase" shape="square" width="full" onClick={onClickBuy} />
       {purchaseModalIsOpen && (
         <Modal
-          contentProps={{
-            style: { height: isMobile ? 'auto' : '300px' }
-          }}
           onClose={() => {
             setPurchaseModalIsOpen(false)
           }}

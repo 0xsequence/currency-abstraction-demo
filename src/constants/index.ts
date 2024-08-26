@@ -1,12 +1,9 @@
 // sales params
-export const NFT_TOKEN_ADDRESS = '0xe330d543e9189450c36dc873aa3ab14106b1ee87'
-export const SALES_CONTRACT_ADDRESS = '0xfdd0d596350a78c3852a43d3b5910154b7c644db'
-export const CHAIN_ID = 11155111
-export const ETHERSCAN_URL = 'https://sepolia.etherscan.io'
-export const SWAP_CURRENCY = {
-  name: 'Wrapped Eth',
-  url: 'https://sepolia.etherscan.io/token/0xfff9976782d46cc05630d1f6ebab18b2324d6b14#writeContract'
-}
+export const NFT_TOKEN_ADDRESS = import.meta.env.VITE_NFT_TOKEN_ADDRESS
+export const SALES_CONTRACT_ADDRESS = import.meta.env.VITE_SALES_CONTRACT_ADDRESS
+export const CHAIN_ID = Number(import.meta.env.VITE_CHAIN_ID)
+export const ETHERSCAN_URL = import.meta.env.VITE_ETHERSCAN_URL
+export const TRANSACTION_CONFIRMATIONS = Number(import.meta.env.VITE_TRANSACTION_CONFIRMATIONS)
 
 interface SaleItem {
   tokenId: string

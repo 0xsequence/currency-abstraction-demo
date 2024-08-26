@@ -8,7 +8,7 @@ import { ChainId } from '@0xsequence/network'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Transport } from 'viem'
 import { createConfig, http, WagmiProvider } from 'wagmi'
-import { sepolia, Chain } from 'wagmi/chains'
+import { polygon, Chain } from 'wagmi/chains'
 
 import { useProjectAccessKey } from '../hooks/useProjectAccessKey'
 
@@ -24,7 +24,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
 
   const connectors = getDefaultWaasConnectors({
     walletConnectProjectId,
-    defaultChainId: ChainId.SEPOLIA,
+    defaultChainId: ChainId.POLYGON,
     appName: 'demo app',
     projectAccessKey,
     waasConfigKey,
@@ -33,7 +33,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     appleRedirectURI
   })
 
-  const chains = [sepolia] as [Chain, ...Chain[]]
+  const chains = [polygon] as [Chain, ...Chain[]]
   const transports = chains.reduce<Record<number, Transport>>((acc, chain) => {
     acc[chain.id] = http()
     return acc

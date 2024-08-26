@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Box, Button, Card, Spinner, Text, TokenImage, useMediaQuery } from '@0xsequence/design-system'
 import { SequenceWaaS } from '@0xsequence/waas'
 import { formatUnits, zeroAddress, Hex, toHex, encodeFunctionData } from 'viem'
 import { usePublicClient, useWalletClient, useReadContract, useAccount } from 'wagmi'
 
-import { useBalance } from '../../hooks/data'
+import { useSwapQuotes, SwapQuotesWithCurrencyInfo } from '../../hooks/data'
 import { useSalesCurrency } from '../../hooks/useSalesCurrency'
 import { useClearCachedBalances } from '../../hooks/useClearCachedBalances'
+import { useClearCachedQuotes } from '../../hooks/useClearCachedQuotes'
+import { compareAddress } from '../../utils'
 
 import { SALES_CONTRACT_ADDRESS, CHAIN_ID, TRANSACTION_CONFIRMATIONS } from '../../constants'
 import { SALES_CONTRACT_ABI, ERC_20_CONTRACT_ABI } from '../../constants/abi'
@@ -24,14 +26,15 @@ interface TokenSaleDetailsData {
   address: string
 }
 
-export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
+export const SwapAndBuy = (args: BuyWithMainCurrencyProps) => {
   const isMobile = useMediaQuery('isMobile')
   const { data: currencyData, isLoading: currencyIsLoading } = useSalesCurrency()
   const { address: userAddress, connector } = useAccount()
   const { clearCachedBalances } = useClearCachedBalances()
+  const { clearCachedQuotes } = useClearCachedQuotes()
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
-  const [purchaseInProgress, setPurchaseInProgress] = useState(false)
+  const [swapsInProgress, setSwapsInProgress] = useState<string[]>([])
 
   const { data: tokenSaleDetailsData, isLoading: tokenSaleDetailsDataIsLoading } = useReadContract({
     abi: SALES_CONTRACT_ABI,
@@ -56,32 +59,32 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     }
   })
 
-  const { data: currencyBalanceData, isLoading: currencyBalanceIsLoading } = useBalance({
-    chainId: args.chainId,
-    contractAddress: currencyData?.address || '',
-    accountAddress: userAddress || '',
-    // includeMetadata must be false to work around a bug
-    includeMetadata: false
-  })
-
   const price = (tokenSaleDetailsData as TokenSaleDetailsData)?.cost || 0n
-  const priceFormatted = formatUnits(BigInt(price), currencyData?.decimals || 0)
   const isApproved: boolean = (allowanceData as bigint) >= BigInt(price)
 
-  const balance: bigint = BigInt(currencyBalanceData?.[0]?.balance || '0')
-  let balanceFormatted = Number(formatUnits(balance, currencyData?.decimals || 0))
-  balanceFormatted = Math.trunc(Number(balanceFormatted) * 10000) / 10000
+  const { data: swapQuotes, isLoading: swapQuotesIsLoading } = useSwapQuotes({
+    userAddress: userAddress ?? '',
+    currencyAddress: currencyData?.address || '',
+    chainId: args.chainId,
+    currencyAmount: price.toString(),
+    withContractInfo: true
+  })
 
-  const isNotEnoughFunds: boolean = price > balance
+  useEffect(() => {
+    clearCachedQuotes()
+    setSwapsInProgress([])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || currencyBalanceIsLoading
+  const isLoading: boolean = currencyIsLoading || tokenSaleDetailsDataIsLoading || allowanceIsLoading || swapQuotesIsLoading
 
-  const onClickPurchase = async () => {
+  const onClickPurchase = async (swapQuote: SwapQuotesWithCurrencyInfo) => {
     if (!walletClient || !userAddress || !publicClient || !userAddress || !currencyData || !connector) {
       return
     }
 
-    setPurchaseInProgress(true)
+    const swapQuoteAddress = swapQuote.info?.address || ''
+
+    setSwapsInProgress([...swapsInProgress.filter(address => compareAddress(address, swapQuoteAddress)), swapQuoteAddress])
 
     try {
       const walletClientChainId = await walletClient.getChainId()
@@ -102,6 +105,23 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       })
 
       const transactions = [
+        // Swap quote optional approve step
+        ...(swapQuote.quote.approveData
+          ? [
+              {
+                to: swapQuote.quote.currencyAddress,
+                data: swapQuote.quote.approveData,
+                chain: CHAIN_ID
+              }
+            ]
+          : []),
+        // Swap quote tx
+        {
+          to: swapQuote.quote.to,
+          data: swapQuote.quote.transactionData,
+          chain: CHAIN_ID
+        },
+        // Actual transaction optional approve step
         ...(isApproved
           ? []
           : [
@@ -111,6 +131,7 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
                 chainId: CHAIN_ID
               }
             ]),
+        // transaction on the sales contract
         {
           to: SALES_CONTRACT_ADDRESS,
           data: purchaseTransactionData as string,
@@ -168,11 +189,12 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
       args.closeModal()
       refechAllowance()
       clearCachedBalances()
+      clearCachedQuotes()
     } catch (e) {
       console.error('Failed to purchase...', e)
     }
 
-    setPurchaseInProgress(false)
+    setSwapsInProgress([...swapsInProgress.filter(address => compareAddress(address, swapQuoteAddress))])
   }
 
   if (isLoading) {
@@ -191,18 +213,11 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     )
   }
 
-  const StatusMessage = () => {
-    if (isNotEnoughFunds) {
-      return (
-        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
-          <Text variant="small" color="negative">
-            Not enough funds
-          </Text>
-          <Box style={{ height: '22px', width: '22px' }} />
-        </Box>
-      )
-    }
+  interface StatusMessageProps {
+    purchaseInProgress: boolean
+  }
 
+  const StatusMessage = ({ purchaseInProgress }: StatusMessageProps) => {
     if (purchaseInProgress) {
       return (
         <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
@@ -219,55 +234,63 @@ export const BuyWithMainCurrency = (args: BuyWithMainCurrencyProps) => {
     return null
   }
 
-  return (
-    <Card
-      width="full"
-      flexDirection={isMobile ? 'column' : 'row'}
-      alignItems="center"
-      justifyContent="space-between"
-      gap={isMobile ? '2' : '0'}
-      style={{
-        minHeight: '200px'
-      }}
-    >
-      <Box
-        flexDirection="column"
-        gap="2"
-        justifyContent={isMobile ? 'center' : 'flex-start'}
-        style={{ ...(isMobile ? { width: '200px' } : {}) }}
+  return swapQuotes?.map((swapQuote, index) => {
+    const swapQuotePriceFormatted = formatUnits(BigInt(swapQuote.quote.price), swapQuote.info?.decimals || 18)
+    const balanceFormatted = formatUnits(BigInt(swapQuote.balance?.balance || 0), swapQuote.info?.decimals || 18)
+    const swapQuoteAddress = swapQuote.info?.address || ''
+    const purchaseInProgress = swapsInProgress.includes(swapQuoteAddress)
+
+    return (
+      <Card
+        key={swapQuote.info?.address || index}
+        width="full"
+        flexDirection={isMobile ? 'column' : 'row'}
+        alignItems="center"
+        justifyContent="space-between"
+        gap={isMobile ? '2' : '0'}
+        style={{
+          minHeight: '200px'
+        }}
       >
-        <Box justifyContent={isMobile ? 'center' : 'flex-start'}>
-          <Text color="text100">Buy With {currencyData?.name}</Text>
+        <Box
+          flexDirection="column"
+          gap="2"
+          justifyContent={isMobile ? 'center' : 'flex-start'}
+          style={{ ...(isMobile ? { width: '200px' } : {}) }}
+        >
+          <Box justifyContent={isMobile ? 'center' : 'flex-start'}>
+            <Text color="text100">Buy With {swapQuote.info?.name}</Text>
+          </Box>
+          <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
+            <Text variant="small" color="text100">
+              {`Price: ${swapQuotePriceFormatted} ${swapQuote.info?.symbol}`}
+            </Text>
+            <TokenImage size="xs" src={swapQuote.info?.logoURI} />
+          </Box>
+          <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
+            <Text variant="small" color="text100">
+              {`Balance: ${balanceFormatted} ${swapQuote.info?.symbol}`}
+            </Text>
+            <TokenImage size="xs" src={swapQuote.info?.logoURI} />
+          </Box>
+          <StatusMessage purchaseInProgress={purchaseInProgress} />
         </Box>
-        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
-          <Text variant="small" color="text100">
-            {`Price: ${priceFormatted} ${currencyData?.symbol}`}
-          </Text>
-          <TokenImage size="xs" src={currencyData?.logoURI} />
+        <Box
+          flexDirection="column"
+          gap="2"
+          alignItems={isMobile ? 'center' : 'flex-start'}
+          style={{ ...(isMobile ? { width: '200px' } : {}) }}
+        >
+          <Button
+            label="Purchase"
+            onClick={() => onClickPurchase(swapQuote)}
+            disabled={purchaseInProgress}
+            variant="primary"
+            shape="square"
+            pending={purchaseInProgress}
+          />
         </Box>
-        <Box flexDirection="row" gap="1" alignItems="center" justifyContent={isMobile ? 'center' : 'flex-start'}>
-          <Text variant="small" color="text100">
-            {`Balance: ${balanceFormatted} ${currencyData?.symbol}`}
-          </Text>
-          <TokenImage size="xs" src={currencyData?.logoURI} />
-        </Box>
-        <StatusMessage />
-      </Box>
-      <Box
-        flexDirection="column"
-        gap="2"
-        alignItems={isMobile ? 'center' : 'flex-start'}
-        style={{ ...(isMobile ? { width: '200px' } : {}) }}
-      >
-        <Button
-          label="Purchase"
-          onClick={onClickPurchase}
-          disabled={purchaseInProgress || isNotEnoughFunds}
-          variant="primary"
-          shape="square"
-          pending={purchaseInProgress}
-        />
-      </Box>
-    </Card>
-  )
+      </Card>
+    )
+  })
 }
