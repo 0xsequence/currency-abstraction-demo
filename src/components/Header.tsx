@@ -21,10 +21,21 @@ export const Header = () => {
       {isConnected && !salesCurrencyIsLoading && (
         <Box marginTop="5" marginBottom="4" style={{ maxWidth: 600 }}>
           <Text color="text100">
-            This is a demo that showcases currency abstraction using Sequence services. Make sure there is some {network?.nativeToken.symbol} in your connected wallet (
-              <Text color="text100" as="a" href={`${ETHERSCAN_URL}/address/${userAddress}`} target="_blank" rel="noreferrer ">{formattedUserAddress}</Text>
+            This is a demo that showcases currency abstraction using Sequence services. Make sure there is some{' '}
+            {network?.nativeToken.symbol} in your connected wallet (
+            <Text color="text100" as="a" href={`${ETHERSCAN_URL}/address/${userAddress}`} target="_blank" rel="noreferrer ">
+              {formattedUserAddress}
+            </Text>
             ), then purchase one of the listed tokens with&nbsp;
-            <Text color="text100" as="a" href={`${ETHERSCAN_URL}/token/${salesCurrencyData?.address}`} target="_blank" rel="noreferrer ">{salesCurrencyData?.symbol}</Text>
+            <Text
+              color="text100"
+              as="a"
+              href={`${ETHERSCAN_URL}/token/${salesCurrencyData?.address}`}
+              target="_blank"
+              rel="noreferrer "
+            >
+              {salesCurrencyData?.symbol}
+            </Text>
             . With a single transaction, you will be able to swap and submit the purchase.
           </Text>
         </Box>
