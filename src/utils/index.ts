@@ -1,11 +1,9 @@
-export const truncateAtMiddle = (text: string, truncateAt: number) => {
-  let finalText = text
-
-  if (text.length >= truncateAt) {
-    finalText = text.slice(0, truncateAt / 2) + '...' + text.slice(text.length - truncateAt / 2, text.length)
+export const truncateAddress = (address: string, minPrefix: number = 20, minSuffix: number = 3): string => {
+if (minPrefix + minSuffix >= 40 || address == '') {
+    return address
+  } else {
+    return `${address.substring(0, 2 + minPrefix)}…${address.substring(address.length - minSuffix)}`
   }
-
-  return finalText
 }
 
 export const compareAddress = (a: string, b: string) => {
