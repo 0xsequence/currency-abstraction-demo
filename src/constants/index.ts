@@ -11,6 +11,9 @@ interface SaleItem {
 
 export const itemsForSales: SaleItem[] = [
   {
+    tokenId: '0'
+  },
+  {
     tokenId: '1'
   },
   {
@@ -24,8 +27,5 @@ export const itemsForSales: SaleItem[] = [
   },
   {
     tokenId: '5'
-  },
-  {
-    tokenId: '6'
   }
 ]
