@@ -11,21 +11,9 @@ interface SaleItem {
 
 export const itemsForSales: SaleItem[] = [
   {
+    tokenId: '0'
+  },
+  {
     tokenId: '1'
-  },
-  {
-    tokenId: '2'
-  },
-  {
-    tokenId: '3'
-  },
-  {
-    tokenId: '4'
-  },
-  {
-    tokenId: '5'
-  },
-  {
-    tokenId: '6'
   }
 ]

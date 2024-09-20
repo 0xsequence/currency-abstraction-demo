@@ -7,7 +7,7 @@ export const useMetadataClient = () => {
   const projectAccessKey = useProjectAccessKey()
 
   const metadataClient = useMemo(() => {
-    const clientUrl = 'https://metadata.sequence.app'
+    const clientUrl = 'https://dev-metadata.sequence.app'
 
     return new SequenceMetadata(clientUrl, projectAccessKey)
   }, [projectAccessKey])
