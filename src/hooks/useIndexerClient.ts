@@ -12,7 +12,7 @@ export const useIndexerClient = (chainId: ChainId) => {
   }, [])
 
   const network = networks[chainId]
-  const clientUrl = `https://${network.name}-indexer.sequence.app`
+  const clientUrl = `https://dev-${network.name}-indexer.sequence.app`
 
   if (!indexerClients.has(chainId)) {
     indexerClients.set(chainId, new SequenceIndexer(clientUrl, projectAccessKey))

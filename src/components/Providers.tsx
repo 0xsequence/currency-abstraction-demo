@@ -24,13 +24,14 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
 
   const connectors = getDefaultWaasConnectors({
     walletConnectProjectId,
-    defaultChainId: ChainId.POLYGON,
+    defaultChainId: ChainId.ARBITRUM_SEPOLIA,
     appName: 'demo app',
     projectAccessKey,
     waasConfigKey,
     googleClientId,
     appleClientId,
-    appleRedirectURI
+    appleRedirectURI,
+    isDev: true
   })
 
   const chains = [polygon] as [Chain, ...Chain[]]
@@ -49,7 +50,8 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     projectAccessKey,
     signIn: {
       projectName: 'Demo'
-    }
+    },
+    isDev: true
   }
 
   return (
