@@ -26,7 +26,7 @@ export const useTokenMetadata = (chainId: number, contractAddress: string, token
         tokenIDs: tokenIds
       })
 
-      return res.tokenMetadata
+      return res.tokenMetadata.filter(n => !!n)
     },
     retry: true,
     staleTime: time.oneMinute * 10,
