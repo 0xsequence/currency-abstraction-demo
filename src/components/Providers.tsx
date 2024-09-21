@@ -1,8 +1,7 @@
 import React from 'react'
 
 import { ThemeProvider } from '@0xsequence/design-system'
-import { KitProvider } from '@0xsequence/kit'
-import { getDefaultWaasConnectors } from '@0xsequence/kit-connectors'
+import { getDefaultWaasConnectors, KitProvider } from '@0xsequence/kit'
 import { KitCheckoutProvider } from '@0xsequence/kit-checkout'
 import { ChainId } from '@0xsequence/network'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
